@@ -31,8 +31,8 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                         leafletOutput("map", width="100%", height="100%"),
                         
                         absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-                                      draggable = TRUE, top = 60, left = 20, right = "auto", bottom = "auto",
-                                      width = 330, height = "auto",
+                                      draggable = TRUE, top = 60, left = 30, right = "auto", bottom = "auto",
+                                      width = 350, height = "auto",
                                       
                                    #   h3("Explore Hydrology and Sea Level Rise (SLR) Scenarios"),
                                    
@@ -50,9 +50,12 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                                   step = 1
                                                   ),
                                    
-                                      tags$em("Note: no data exist for 8' and 9' of SLR.")
+                                      tags$em("Note: no data exist for 8' and 9' of SLR."),
+                                      
+                                       tags$br(),
+                                       tags$br(),
                                    
-                                   #,
+                                
                     
                                       
                                     #  uiOutput("selected_var"), # reactive text
@@ -71,8 +74,9 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                    
                                   #  tags$div(
                                   #    tags$a("Get a lat/long from an address here.", href="https://www.latlong.net/convert-address-to-lat-long.html", target="_blank")
-                                  #  )
-                                      
+                                  #  ),
+                              
+                                tableOutput('table')
                                       
                         )
                         

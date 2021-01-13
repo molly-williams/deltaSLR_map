@@ -3,11 +3,9 @@
 
 
 library(shiny)
+library(shinyWidgets)
 library(leaflet)
 
-
-vars_hydro <- c("Historical", "2050", "2085")
-vars_SLR <- c(1,2,3,4,5,6,7,10)
 
 
 
@@ -19,7 +17,7 @@ inline=function(x) {
 
 navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
            
-           tabPanel("Interactive map",
+           tabPanel("Probabilistic map",
                     div(class="outer",
                         
                         tags$head(
@@ -30,53 +28,156 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                         
                         leafletOutput("map", width="100%", height="100%"),
                         
-                        absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-                                      draggable = TRUE, top = 60, left = 30, right = "auto", bottom = "auto",
-                                      width = 350, height = "auto",
+                        absolutePanel(id = "controls", 
+                                      class = "panel panel-default", 
+                                      fixed = TRUE,
+                                      draggable = TRUE, 
+                                      top = 60, 
+                                      left = 30, 
+                                      right = "auto", 
+                                      bottom = "auto",
+                                      width = 350, 
+                                      height = "auto",
                                       
                                    #   h3("Explore Hydrology and Sea Level Rise (SLR) Scenarios"),
                                    
+                                   h4("Instructions:"),
+                                   tags$div(
+                                     tags$ul(
+                                       tags$li("Use this tool to visualize Delta regions at risk of flood exposure and associated likelihoods by selecting a watershed hydrology category and an amount of sea level rise"),
+                                       tags$li("Toggle flood exposure polygons in the upper right-hand corner to isolate areas at high flood risk in the next 10 years, 50 years, 100 years, and 200 years."),
+                                       tags$li("The polygons are inclusive, so flood exposure regions of lower flood exposure risk will include those of higher risk."),
+                                       tags$li("Maybe say something here describing what a combination represents - eg. assumptions behind 2050 hydrology + 3' SLR")
+                                     )
+                                   ),
+                                   
+                                   tags$br(),
+                                   
                                    
                                       radioButtons(inputId="hydro", 
-                                                   label=h4("Select hydrology:"), 
+                                                   label=h4("1. Select watershed hydrology:"), 
                                                    choices=c("Historical", "2050", "2085")
                                                    ),
                                       
-                                      sliderInput(inputId="SLR",
-                                                  label = h4("Select SLR (feet):"),
-                                                  min = 0,
-                                                  max = 10,
-                                                  value = 0,
-                                                  step = 1
+                                      sliderTextInput(inputId="SLR",
+                                                  label = h4("2. Select sea level rise (feet):"),
+                                                  choices = c(0:7, 10),
+                                                  grid=TRUE
                                                   ),
+                                   tags$em("Note: no data exist for 8' and 9' of SLR."),
                                    
-                                      tags$em("Note: no data exist for 8' and 9' of SLR."),
-                                      
-                                       tags$br(),
-                                       tags$br(),
+                                   tags$br(),
+                                   tags$br()
                                    
-                                
-                    
-                                      
-                                    #  uiOutput("selected_var"), # reactive text
+                                   #, 
+                                   # checkboxGroupButtons(
+                                   #   inputId = "ID10",
+                                   #   label = h4("Toggle flood exposure risk layers:"),
+                                   #   choices = "10 year flood exposure",
+                                   #   selected = "10 year flood exposure",
+                                   #   checkIcon = list(
+                                   #     yes = tags$i(class = "fa fa-check-square",
+                                   #                  style = "color: #08519C"),
+                                   #     no = tags$i(class = "fa fa-square-o",
+                                   #                 style = "color: #08519C"))
+                                   # ),
+                                   #
+                                   # tags$div(
+                                   #   tags$ul(
+                                   #     tags$li(
+                                   #       tags$b("Very high likelihood")
+                                   #     ),
+                                   #     tags$li("Annual Chance: 10%"),
+                                   #     tags$li("Chance over 10 years: >65%")
+                                   #   )
+                                   # ),
+                                   #
+                                   # checkboxGroupButtons(
+                                   #   inputId = "ID50",
+                                   #   choices = c("50 year flood exposure"),
+                                   #   selected = c("50 year flood exposure"),
+                                   #   checkIcon = list(
+                                   #     yes = tags$i(class = "fa fa-check-square",
+                                   #                  style = "color: #3182BD"),
+                                   #     no = tags$i(class = "fa fa-square-o",
+                                   #                 style = "color: #3182BD"))
+                                   # ),
+                                   #
+                                   # tags$div(
+                                   #   tags$ul(
+                                   #     tags$li(
+                                   #       tags$b("High likelihood")
+                                   #     ),
+                                   #     tags$li("Annual Chance: 2-10%"),
+                                   #     tags$li("Chance over 10 years: 18-65%")
+                                   #   )
+                                   # ),
+                                   #
+                                   # checkboxGroupButtons(
+                                   #   inputId = "ID100",
+                                   #   choices = c("100 year flood exposure"),
+                                   #   selected = c("100 year flood exposure"),
+                                   #   checkIcon = list(
+                                   #     yes = tags$i(class = "fa fa-check-square",
+                                   #                  style = "color: #6BAED6"),
+                                   #     no = tags$i(class = "fa fa-square-o",
+                                   #                 style = "color: #6BAED6"))
+                                   # ),
+                                   #
+                                   # tags$div(
+                                   #   tags$ul(
+                                   #     tags$li(
+                                   #       tags$b("Medium likelihood")
+                                   #     ),
+                                   #     tags$li("Annual Chance: 1-2%"),
+                                   #     tags$li("Chance over 10 years: 10-18%")
+                                   #   )
+                                   # ),
+                                   #
+                                   # checkboxGroupButtons(
+                                   #   inputId = "ID200",
+                                   #   choices = c("200 year flood exposure"),
+                                   #   selected = c("200 year flood exposure"),
+                                   #   checkIcon = list(
+                                   #     yes = tags$i(class = "fa fa-check-square",
+                                   #                  style = "color: #BDD7E7"),
+                                   #     no = tags$i(class = "fa fa-square-o",
+                                   #                 style = "color: #BDD7E7"))
+                                   # ),
+                                   #
+                                   # tags$div(
+                                   #   tags$ul(
+                                   #     tags$li(
+                                   #       tags$b("Low likelihood")
+                                   #     ),
+                                   #     tags$li("Annual Chance: 0.5-1%"),
+                                   #     tags$li("Chance over 10 years: 5-10%")
+                                   #   )
+                                   # )
+                                   #
+                                   #
+                                   #
                                    
-                                  #    tags$br(),
-                                  #    tags$br(),
                                    
-                                  #    h4("Pin Location on Map:"),
-                                  #    inline(numericInput("long", label = h5("Longitude:"), value = -121.50001)),
-                                  #    inline(numericInput("lat", label = h5("Latitude:"), value = 38.00001)),
-                                      
-                                  #    actionButton("recalc", "Show point", width="40%"),
+                                   #  uiOutput("selected_var"), # reactive text
                                    
-                                  #  tags$br(),
-                                  #  tags$br(),
+                                   #    tags$br(),
+                                   #    tags$br(),
                                    
-                                  #  tags$div(
-                                  #    tags$a("Get a lat/long from an address here.", href="https://www.latlong.net/convert-address-to-lat-long.html", target="_blank")
-                                  #  ),
-                              
-                                tableOutput('table')
+                                   #    h4("Pin Location on Map:"),
+                                   #    inline(numericInput("long", label = h5("Longitude:"), value = -121.50001)),
+                                   #    inline(numericInput("lat", label = h5("Latitude:"), value = 38.00001)),
+                                   
+                                   #    actionButton("recalc", "Show point", width="40%"),
+                                   
+                                   #  tags$br(),
+                                   #  tags$br(),
+                                   
+                                   #  tags$div(
+                                   #    tags$a("Get a lat/long from an address here.", href="https://www.latlong.net/convert-address-to-lat-long.html", target="_blank")
+                                   #  ),
+                                   
+                                   #    tableOutput('table')
                                       
                         )
                         
@@ -93,24 +194,13 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                     h3("Background"),
                     tags$div(
                         "This tool was developed as part of",
-                        tags$a("Delta Adapts,", href="https://deltacouncil.ca.gov/delta-plan/climate-change", target="_blank"),
-                        "an initiative of the Delta Stewardship Council to improve resilience to climate change within the Delta through
-                    equitable adaptation strategies.The first phase of the project focuses on conducting a vulnerability assessment for the region, 
-                    in order to protect the vital resources provided by the Delta and the people who live here. The assessment phase characterizes
-                    the potential impacts from seven climate stressors on five specific areas of focus for protection. One of these areas
-                    of focus is 'Society and Equity', which seeks to preserve the unique cultural values of the Delta and prioritize actions
-                    that protect its most vulnerable populations. Delta Adapts is incorporating equity by identifying communities and 
-                    populations that are most susceptible to climate hazards, and develop adaptation strategies that recognize and remedy these inequities.",
+                        tags$a("Delta Adapts: Creating a Climate Resilient Future,", href="https://deltacouncil.ca.gov/delta-plan/climate-change", target="_blank"),
+                        "an initiative of the Delta Stewardship Council.",
                         
                         tags$br(),
                         tags$br(),
                         
-                        "The most vulnerable populations are defined as 'Those which experience heightened risk and increased sensitivity 
-                    to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts'",
-                        tags$a("(Governor's office of Planning and Research, 2015).", href="https://www.opr.ca.gov/planning/icarp/tac/", target="_blank"), 
-                        "These disproportionate effects are caused by physical (built and environmental), social, political, and/or economic 
-                    factor(s), which are exacerbated by climate impacts. These factors include, but are 
-                    not limited to, race, class, sexual orientation and identification, national origin, and income inequality.'",
+                  #      "more intro text here",
                         
                         tags$br(),
                         tags$br(),
@@ -124,67 +214,29 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                     
                     h3("Methodology"),
                     
-                    h4("Indicator Selection"),
+                    h4("Analysis Approach"),
                     tags$div(
-                        "We conducted a literature review and interviews with Delta community leaders to identify fourteen indicators
-                        that contribute to increased sensitivity and decreased adaptive capacity to flooding, extreme heat, and wildfires.
-                        These include nine socio-economic factors (young children, disability status, educational attainment, linguistic 
-                        isolation, older adults (especially those living alone), poverty, race/ethnicity, tenancy, and 
-                        household vehicle access) and five health factors (health insurance, cardiovascular disease, asthma, 
-                        low birth weight, and food insecurity). Many of the indicators are based on five-year estimates from the 
-                        2017 American Community Survey (ACS), an annual survey conducted by the Census Bureau to supplement the Decennial Census"
+                #        "methodology text here"
                     ),
                     tags$br(),
                     
-                    h4("Weighting Scheme"),
-                    tags$div("An individual block group or tract was assigned a score based on the number of indicators for which it 
-                        is in the 70th percentile or higher. Separate scores were calculated based on the socio-economic indicators with data available at the block group 
-                        level and the health indicators available at the tract level. A combined score was calculated by assigning tract-level 
-                        scores to the block groups they contained (using a spatial join in ArcGIS). Because the inputs are at different scales, 
-                        it is important to recognize that the precision of the combined score is overstated. However, there are twice as many
-                        indicators at the block group level, so the combined score is heavily weighted towards the more fine-scale information."
-                    ),
-                    
-                    tags$br(),
-                    
-                    h3("Data Information"),
-                    h4("Data sources"),
+                    h4("Mapping Approach"),
                     tags$div(
-                        tags$a("US Census Bureau 2017 American Community Survey (ACS)", href="https://data.census.gov/cedsci/", target="_blank"),
-                        tags$br(),
-                        tags$a("CalEnviroScreen 3.0", href="https://oehha.ca.gov/calenviroscreen", target="_blank"),
-                        tags$br(),
-                        tags$a("USDA Food Access Research Atlas", href="https://www.ers.usda.gov/data-products/food-access-research-atlas/download-the-data.aspx", target="_blank"),
+                #        "more methodology text here"
                     ),
-                    tags$br(),
-                    tableOutput('indicators'),
                     
+                    tags$br(),
+                    
+                   
                     
                     h3("Resources"),
-                    h4("Other vulnerability indices:"),
-                    tags$div(
-                        tags$a("CalEnviroScreen 3.0", href="https://oehha.ca.gov/calenviroscreen", target="_blank"),
-                        tags$br(),
-                        tags$a("California Heat Assessment Tool", href="https://www.cal-heat.org/", target="_blank"),
-                        tags$br(),
-                        tags$a("Climate Change and Health Vulnerability Indicators (CCHVIz)", href="https://discovery.cdph.ca.gov/ohe/CCHVIz", target="_blank"),
-                        tags$br(),
-                        tags$a("Disadvantaged Communities Mapping Tool", href="https://gis.water.ca.gov/app/dacs", target="_blank"),
-                        tags$br(),
-                        tags$a("Distressed Communities Index", href="https://eig.org/dci", target="_blank"),
-                        tags$br(),
-                        tags$a("Healthy Places Index (HPI)", href="https://healthyplacesindex.org/", target="_blank"),
-                        tags$br(),
-                        tags$a("Regional Opportunity Index", href="https://interact.regionalchange.ucdavis.edu/roi/webmap/webmap.html", target="_blank"),
-                        tags$br(),
-                        tags$a("Social Vulnerability Index (SoVI)", href="https://coast.noaa.gov/digitalcoast/data/sovi.html", target="_blank")
-                    ),
+
                     tags$br(),
                     
                     h3("Contact"),
                     tags$div(
                         "Please contact ",
-                        tags$a("Avery Livengood", href="mailto:avery.livengood@deltacouncil.ca.gov"),
+                        tags$a("Andrew/Cory?", href="mailto:avery.livengood@deltacouncil.ca.gov"),
                         " at the Delta Stewardship Council with any questions."
                     ),
                     

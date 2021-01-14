@@ -7,7 +7,13 @@ library(shinyWidgets)
 library(leaflet)
 
 
+# Deterministic choices for dropdown:
 
+vars <- c("Baseline: 0' SLR",
+          "2030: 0.5' SLR",
+          "2050: 1' SLR",
+          "2050: 2' SLR", 
+          "2050+: 3.5' SLR")
 
 inline=function(x) {
     tags$div(style="display:inline-block;", x)
@@ -16,6 +22,79 @@ inline=function(x) {
 
 
 navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
+           
+           
+           tabPanel("Deterministic map",
+                    div(class="outer",
+                        tags$head(
+                          includeCSS("styles.css"),
+                          includeScript("gomap.js")
+                        ),
+                        
+                        leafletOutput("map2", width="100%", height="100%"),
+                        
+                        absolutePanel(id = "controls", 
+                                      class = "panel panel-default", 
+                                      fixed = TRUE,
+                                      draggable = TRUE, 
+                                      top = 60, 
+                                      left = 30, 
+                                      right = "auto", 
+                                      bottom = "auto",
+                                      width = 350, 
+                                      height = "auto",
+                        
+                                      h3("Welcome!"),
+                                      tags$div(
+                                        "Use this tool to visualize deterministic and probabilistic flood exposure scenarios for the Sacramento-San Joaquin River Delta and Suisun Marsh region.",
+                                        tags$br(),
+                                        tags$br(),
+                                        "This tab allows you to generate deterministic maps that identify regions that are likely to experience 100-year floods under future scenarios.",
+                                        tags$br(),
+                                        tags$br(),
+                                        "Head to the probabilistic tab to see regions of flood exposure risk based on probability over time."
+                                        
+                                      ),
+                                      
+                                      tags$br(), 
+                                      tags$br(),
+                                      
+                                      h4("Create a deterministic map:"),
+                                      tags$div(
+                                        tags$ul(
+                                          tags$li("Use the dropdown menu to select a year and associated sea level rise (SLR) scenario to generate a deterministic map of 100-year flood exposures."
+                                          ),
+                                          tags$li("Toggle asset categories using checkboxes in the upper righthand corner.")
+                                        )
+                                        
+                                      ),
+                                      
+                                      tags$br(),
+                                      
+
+                                      selectInput("scenario", h4("Select Scenario:"), vars, selectize=FALSE),
+                                      
+                                      
+                                      tags$br(),
+                                      tags$br(),
+                                      
+                                      
+                                      a(shiny::icon("reply"), "Delta Science shinyapps homepage", 
+                                        href="https://deltascience.shinyapps.io/Home/")
+                                      
+                                      
+                        
+                        ) #end absolute panel
+                        
+                        ), #end div
+              
+              tags$div(id="cite",
+                       tags$em('This map was created in support of the Delta Adapts initiative, a project of the Delta Stewardship Council (2020)')
+                       )
+                        
+           ), # end tabpanel
+           
+           
            
            tabPanel("Probabilistic map",
                     div(class="outer",
@@ -41,7 +120,7 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                       
                                    #   h3("Explore Hydrology and Sea Level Rise (SLR) Scenarios"),
                                    
-                                   h4("Instructions:"),
+                                   h4("Create a probabilistic map:"),
                                    tags$div(
                                      tags$ul(
                                        tags$li("Use this tool to visualize Delta regions at risk of flood exposure and associated likelihoods by selecting a watershed hydrology category and an amount of sea level rise"),
@@ -56,7 +135,8 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                    
                                       radioButtons(inputId="hydro", 
                                                    label=h4("1. Select watershed hydrology:"), 
-                                                   choices=c("Historical", "2050", "2085")
+                                                   choices=c("Historical", "2050", "2085"),
+                                                   selected="Historical"
                                                    ),
                                       
                                       sliderTextInput(inputId="SLR",
@@ -67,7 +147,15 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                    tags$em("Note: no data exist for 8' and 9' of SLR."),
                                    
                                    tags$br(),
-                                   tags$br()
+                                   tags$br(),
+                                   
+                                   
+                                   a(shiny::icon("reply"), "Delta Science shinyapps homepage", 
+                                     href="https://deltascience.shinyapps.io/Home/")
+                                   
+                                   
+                                   #  uiOutput("selected_var"), # reactive text
+                                   
                                    
                                    #, 
                                    # checkboxGroupButtons(

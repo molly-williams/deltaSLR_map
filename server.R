@@ -1,11 +1,6 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# Code adapted in part from the COVID-19 mapper app: https://shiny.rstudio.com/gallery/covid19-tracker.html,
+# and the SuperZIP map: https://shiny.rstudio.com/gallery/superzip-example.html, 
+
 
 
 library(shiny)
@@ -16,11 +11,91 @@ library(tidyverse)
 library(rgeos)
 library(sf)
 require(stringr)
-
+library(htmlwidgets)
 
 ###################### Data import and wrangling ###########################
 
-# Import combined simplified polygons
+# Import individual deterministic polygons and  levee lines
+# Note: these polygons were last updated 19 Nov 2020 and were copied in Jan '21 from G:ArcGIS\Projects\CCVA_Flood\DeltaAdapts_Mapping_KG\DeltaAdapts_FloodMap_InputData\201120_FloodMap_Inputs\Deterministic111920
+
+M0 <- read_sf("3_ShinyData/Deterministic/BaseDet.shp") %>% 
+  select(NAME, fldfight) %>% 
+  mutate(scenario = "Baseline: 0' SLR") %>% 
+  st_transform(4326)
+
+M1 <- read_sf("3_ShinyData/Deterministic/HlfDet.shp") %>% 
+  select(NAME, fldfight) %>% 
+  mutate(scenario = "2030: 0.5' SLR") %>%
+  st_transform(4326)
+
+M2 <- read_sf("3_ShinyData/Deterministic/OneDet.shp") %>% 
+  select(NAME, fldfight) %>% 
+  mutate(scenario = "2050: 1' SLR") %>% 
+  st_transform(4326)
+
+M3 <- read_sf("3_ShinyData/Deterministic/TwoDet.shp") %>% 
+  select(NAME, fldfight) %>%
+  mutate(scenario = "2050: 2' SLR") %>%
+  st_transform(4326)
+
+M4 <- read_sf("3_ShinyData/Deterministic/3_5Det.shp") %>% 
+  select(NAME, fldfight) %>%
+  mutate(scenario = "2050+: 3.5' SLR") %>%
+  st_transform(4326)
+
+det_polys <- rbind(M0, M1, M2, M3, M4)
+
+levees <- read_sf("3_ShinyData/Deterministic/leveeOutput11302020.shp") %>% 
+  st_transform(4326)
+
+
+############ Import assets 
+# Note: these data came from AECOM's DSC Asset Output folder on sharepoint from Dec 2020. 
+
+#### Transportation infrastructure
+airstrips <- read_sf("3_ShinyData/Assets/trans_airstrips.shp") %>% 
+  select(Type=SOURCE_D_1, geometry) %>% 
+  st_transform(4326)
+
+bridges <- read_sf("3_ShinyData/Assets/trans_bridges.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type="Bridge") %>% 
+  st_transform(4326)
+
+trans_points <- rbind(airstrips, bridges)
+
+
+scenic_hwys <- read_sf("3_ShinyData/Assets/trans_scenic_hwys.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type="Scenic Highway") %>% 
+  st_transform(4326)
+
+county_hwys <- read_sf("3_ShinyData/Assets/trans_county_highways.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type="County Highway") %>% 
+  st_transform(4326)
+  
+highways <- read_sf("3_ShinyData/Assets/trans_highways.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type="Highway") %>% 
+  st_transform(4326)
+  
+railroads <- read_sf("3_ShinyData/Assets/trans_railroads.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type="Railroad") %>% 
+  st_transform(4326)
+
+bike_routes <- read_sf("3_ShinyData/Assets/trans_bike_routes.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type="Bike Route") %>% 
+  st_transform(4326)
+
+trans_lines <- rbind(county_hwys, scenic_hwys) # not working????
+
+#### Energy 
+
+############## Import combined simplified probabilistic polygons
+# Note: these polygons are outputs from the overtopping analysis script in this repository
 flood_polys <- read_sf("3_ShinyData/poly_combined_simp.shp")
 
 
@@ -85,21 +160,18 @@ prob_legend <- read_csv("3_ShinyData/prob_legend.csv")
 
 # Create color palettes
 pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), ordered=TRUE, flood_polys$Probability, na.color="transparent")
+
 nm_pal <- colorFactor(c("#969696"), ordered=TRUE, not_modeled$Modeled, na.color="transparent")
 
 
 #display.brewer.all(colorblindFriendly = T)
 #brewer.pal(5, "Blues") = "#EFF3FF" "#BDD7E7" "#6BAED6" "#3182BD" "#08519C"
-#display.brewer.pal - look at colors
+#display.brewer.pal(5, "Blues") - look at colors
 
 
 # Create text for popups
 popup_text10 <- paste(
-  #"<span style='font-size: 100%'>Flood risk probability: ", 
-  flood_polys10$Probability,
-  #"</span><br/>",
- # "Vulnerability Rating: ", sovi$Vulnerability, # not working correctly
-  sep="") %>%
+  flood_polys10$Probability, sep="") %>%
   lapply(htmltools::HTML)
 
 popup_text50 <- paste(flood_polys50$Probability, sep="") %>%
@@ -112,13 +184,14 @@ popup_text200 <- paste(flood_polys200$Probability, sep="") %>%
   lapply(htmltools::HTML)
 
 
-
 mb_url <- "https://api.mapbox.com/styles/v1/moowill/cki99lcza15g818phcibhxpv2/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibW9vd2lsbCIsImEiOiJja2kzejloOHkxdzNtMnhxcTAwY3Zqa25zIn0.VCsBGYnJr6Z7A7XnD157cg"
 # get link from published mapbox map through share > click third party > select "CARTO" > copy link 
 # includes access token
 
 
-############################# Server logic #################################
+
+
+######################################## Server logic ###########################################
 
 function(input, output, session) {
 
@@ -135,8 +208,184 @@ function(input, output, session) {
                               spacing="xs") 
 
 
+  
+  
+############################ Deterministic server logic ############################
+  
+  # Create deterministic basemap
+  
+  output$map2 <- renderLeaflet({
+    leaflet() %>% 
+      addTiles(
+        urlTemplate = mb_url,
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+      )  %>% 
+      setView(lat=38.1, lng=-121.8, zoom=10) 
+    #      addMarkers(data = points(), group="Location Pin")
     
-    # Create basemap
+    
+  })  
+
+  filteredData <- reactive({
+    det_polys[det_polys$scenario == input$scenario,]
+  })
+  
+
+  
+  # Draw deterministic polygons
+  observe({
+    colorBy <- input$scenario
+    
+    if (colorBy == "Baseline: 0' SLR") {
+      colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
+      pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
+    }
+    
+    else { 
+      colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
+      pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
+    }
+    
+    # Create reactive popup text 
+
+      
+    det_popup <- paste(
+      "<span style='font-size: 120%'><strong>", filteredData()$NAME,"</strong></span><br/>", 
+      "Population: ", #comma(filteredData()$pop), 
+      "<br/>",
+      "Area: ", #comma(filteredData()$area), 
+      "<br/>", 
+      "Asset value: ", #dollar(filteredData()$assets), 
+      "<br/>",
+      sep="") %>%
+      lapply(htmltools::HTML)
+    
+    
+    leafletProxy("map2") %>%
+      clearShapes() %>% 
+      
+
+       addPolygons(data=filteredData(),
+                   fillColor=pal(colorData),
+                   fillOpacity=0.6,
+                   stroke = T,
+                   color="black",
+                   weight=0.8,
+                #   label=filteredData()$NAME
+                   popup=det_popup # for some reason this is changing opacity of the polygons? 
+                   
+                   ) %>% 
+     
+      ## Delta boundary
+      addPolygons(data=delta_sm, 
+                  fill=F, 
+                  stroke=T, 
+                  color="black", # polygon border color
+                  weight=4, # polygon border weight
+                  group = "Delta + Suisun Marsh Boundary"
+      ) %>% 
+      
+      ## Social vulnerability data
+      #         addPolygons(data=sovi, 
+      #                       fillColor=sovi_pal(colorData),
+      #                       fillOpacity = 0.5,
+      #                       stroke=T, 
+      #                       color="black", # polygon border color
+      #                       weight=0.8, # polygon border weight
+      #                       label=paste(sovi$Rating),
+      #                       group = "Social Vulnerability") %>% 
+      
+    
+    ## Not-modeled polygons
+    addPolygons(data=not_modeled, 
+                fillColor="#969696",
+                fillOpacity = 0.7,
+                stroke=T,  
+                color="black", # polygon border color
+                weight=0.8, # polygon border weight
+                label=paste("Not Modeled"),
+                group = "Regions Not Modeled"
+    ) %>% 
+    
+      
+      # Add legends  
+      addLegend("bottomright", 
+                pal=nm_pal, 
+                values=not_modeled$Modeled, 
+                layerId="colorLegend2", 
+                # group="Regions Not Modeled",
+                opacity = 1,
+                labFormat = labelFormat(prefix = "", 
+                                        suffix = "", 
+                                        between = " - ", 
+                                        digits = 0)
+      ) %>% 
+
+    
+    
+            addLegend("bottomright", 
+                      pal=pal, 
+                      values=colorData, 
+    #                  title="Social Vulnerability",
+                      layerId="colorLegend3", 
+                      opacity = 0.6,
+    #                  group = "Social Vulnerability",
+                      labFormat = labelFormat(prefix = "", 
+                                              suffix = "", 
+                                              between = " - ", 
+                                              digits = 0)
+          ) %>% 
+      
+      
+      # Add point data
+      addCircles(data=trans_points,
+                 radius = 6,
+                 color="black",
+                 group = HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Transportation: Airstrips and Bridges'),
+                 label = trans_points$Type
+                 ) %>% 
+    
+    
+    
+    ## County boundaries 
+    #           addPolygons(data=delta_counties, 
+    #                       fillColor = "transparent", 
+    #                       stroke=T, 
+    #                       color="yellow", # polygon border color
+    #                       weight=3, # polygon border weight
+    #                       label=paste(delta_counties@data$NAME_UCASE),
+    #                       group = "County Boundaries") %>% 
+    
+  
+      # add layer control panel 
+    addLayersControl(
+      #    baseGroups = c("Basemap"),
+      overlayGroups = c(HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Transportation: Airstrips and Bridges')
+                        #,
+                    #    "Asset Category 2",
+                     #   "Asset Category 3"
+                    ),
+      position = "topright",
+      options = layersControlOptions(collapsed = FALSE)
+    )  %>% 
+      htmlwidgets::onRender("
+        function() {
+            $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:center\">My Epic Title</label>');
+        }
+    ") %>%         
+        hideGroup(HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Transportation: Airstrips and Bridges')
+                          )
+      
+     
+    
+    
+  })
+  
+  
+
+############################# Probabilistic server logic ####################################
+  
+    # Create probabilistic basemap
    
    output$map <- renderLeaflet({
         leaflet() %>% 
@@ -154,22 +403,7 @@ function(input, output, session) {
 
     })
     
-#   filteredData10 <- reactive({
-#     flood_polys10[flood_polys10$Hydrology == input$hydro & flood_polys10$SLR == input$SLR & flood_polys10$Probability == input$ID10,]
-#   })
-   
-#   filteredData50 <- reactive({
-#     flood_polys50[flood_polys50$Hydrology == input$hydro & flood_polys50$SLR == input$SLR & flood_polys50$Probability == input$ID50,]
-#   })
-   
-#   filteredData100 <- reactive({
-#     flood_polys100[flood_polys100$Hydrology == input$hydro & flood_polys100$SLR == input$SLR & flood_polys100$Probability == input$ID100,]
-#   })
-   
-#   filteredData200 <- reactive({
-#     flood_polys200[flood_polys200$Hydrology == input$hydro & flood_polys200$SLR == input$SLR & flood_polys200$Probability == input$ID200,]
-#   })
-   
+
    filteredData10 <- reactive({
      flood_polys10[flood_polys10$Hydrology == input$hydro & flood_polys10$SLR == input$SLR,]
    })
@@ -193,8 +427,6 @@ function(input, output, session) {
           leafletProxy("map") %>%
             clearShapes() %>% 
       
-                    
-                    
                     
            addPolygons(data=filteredData10(), 
                         fillColor="#08519C", 

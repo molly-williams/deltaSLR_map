@@ -9,11 +9,15 @@ library(leaflet)
 
 # Deterministic choices for dropdown:
 
-vars <- c("Baseline: 0' SLR",
-          "2030: 0.5' SLR",
-          "2050: 1' SLR",
-          "2050: 2' SLR", 
-          "2050+: 3.5' SLR")
+vars <- c("Deterministic: 0' SLR",
+          "Deterministic: 2030, 0.5' SLR",
+          "Deterministic: 2050, 1' SLR",
+          "Deterministic: 2050, 2' SLR", 
+          "Deterministic: 2050+, 3.5' SLR",
+          "Probabilistic: Existing conditions",
+          "Probabilistic: 2030 conditions",
+          "Probabilistic: 2050 conditions",
+          "Probabilistic: 2085 conditions")
 
 inline=function(x) {
     tags$div(style="display:inline-block;", x)
@@ -24,7 +28,7 @@ inline=function(x) {
 navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
            
            
-           tabPanel("Deterministic map",
+           tabPanel("Delta Adapts Scenarios",
                     div(class="outer",
                         tags$head(
                           includeCSS("styles.css"),
@@ -49,21 +53,22 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                         "Use this tool to visualize deterministic and probabilistic flood exposure scenarios for the Sacramento-San Joaquin River Delta and Suisun Marsh region.",
                                         tags$br(),
                                         tags$br(),
-                                        "This tab allows you to generate deterministic maps that identify regions that are likely to experience 100-year floods under future scenarios.",
+                                        "This tab allows you to generate maps found in the Delta Adapts Climate Vulnerability Assessment (link) that identify regions that are likely to experience 100-year floods under future scenarios.",
                                         tags$br(),
                                         tags$br(),
-                                        "Head to the probabilistic tab to see regions of flood exposure risk based on probability over time."
+                                        "Head to the Scenario Explorer tab to see regions of flood exposure risk based on probability over time using different hydrology and sea level rise scenarios."
                                         
                                       ),
                                       
                                       tags$br(), 
                                       tags$br(),
                                       
-                                      h4("Create a deterministic map:"),
+                                      h4("Create Delta Adapts maps:"),
                                       tags$div(
                                         tags$ul(
-                                          tags$li("Use the dropdown menu to select a year and associated sea level rise (SLR) scenario to generate a deterministic map of 100-year flood exposures."
+                                          tags$li("Use the dropdown menu to select a deterministic or probabilistic scenario based on expected conditions in a future time period and potential sea level rise (SLR) to generate a deterministic map of 100-year flood exposures."
                                           ),
+                                          tags$li("Click flooded polygons to get more information about that region."),
                                           tags$li("Toggle asset categories using checkboxes in the upper righthand corner.")
                                         )
                                         
@@ -96,7 +101,7 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
            
            
            
-           tabPanel("Probabilistic map",
+           tabPanel("Scenario Explorer",
                     div(class="outer",
                         
                         tags$head(
@@ -120,7 +125,7 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                       
                                    #   h3("Explore Hydrology and Sea Level Rise (SLR) Scenarios"),
                                    
-                                   h4("Create a probabilistic map:"),
+                                   h4("Create your own map:"),
                                    tags$div(
                                      tags$ul(
                                        tags$li("Use this tool to visualize Delta regions at risk of flood exposure and associated likelihoods by selecting a watershed hydrology category and an amount of sea level rise"),
@@ -154,98 +159,8 @@ navbarPage("Climate Change Flood Scenarios in the Delta", id="nav",
                                      href="https://deltascience.shinyapps.io/Home/")
                                    
                                    
-                                   #  uiOutput("selected_var"), # reactive text
-                                   
-                                   
-                                   #, 
-                                   # checkboxGroupButtons(
-                                   #   inputId = "ID10",
-                                   #   label = h4("Toggle flood exposure risk layers:"),
-                                   #   choices = "10 year flood exposure",
-                                   #   selected = "10 year flood exposure",
-                                   #   checkIcon = list(
-                                   #     yes = tags$i(class = "fa fa-check-square",
-                                   #                  style = "color: #08519C"),
-                                   #     no = tags$i(class = "fa fa-square-o",
-                                   #                 style = "color: #08519C"))
-                                   # ),
-                                   #
-                                   # tags$div(
-                                   #   tags$ul(
-                                   #     tags$li(
-                                   #       tags$b("Very high likelihood")
-                                   #     ),
-                                   #     tags$li("Annual Chance: 10%"),
-                                   #     tags$li("Chance over 10 years: >65%")
-                                   #   )
-                                   # ),
-                                   #
-                                   # checkboxGroupButtons(
-                                   #   inputId = "ID50",
-                                   #   choices = c("50 year flood exposure"),
-                                   #   selected = c("50 year flood exposure"),
-                                   #   checkIcon = list(
-                                   #     yes = tags$i(class = "fa fa-check-square",
-                                   #                  style = "color: #3182BD"),
-                                   #     no = tags$i(class = "fa fa-square-o",
-                                   #                 style = "color: #3182BD"))
-                                   # ),
-                                   #
-                                   # tags$div(
-                                   #   tags$ul(
-                                   #     tags$li(
-                                   #       tags$b("High likelihood")
-                                   #     ),
-                                   #     tags$li("Annual Chance: 2-10%"),
-                                   #     tags$li("Chance over 10 years: 18-65%")
-                                   #   )
-                                   # ),
-                                   #
-                                   # checkboxGroupButtons(
-                                   #   inputId = "ID100",
-                                   #   choices = c("100 year flood exposure"),
-                                   #   selected = c("100 year flood exposure"),
-                                   #   checkIcon = list(
-                                   #     yes = tags$i(class = "fa fa-check-square",
-                                   #                  style = "color: #6BAED6"),
-                                   #     no = tags$i(class = "fa fa-square-o",
-                                   #                 style = "color: #6BAED6"))
-                                   # ),
-                                   #
-                                   # tags$div(
-                                   #   tags$ul(
-                                   #     tags$li(
-                                   #       tags$b("Medium likelihood")
-                                   #     ),
-                                   #     tags$li("Annual Chance: 1-2%"),
-                                   #     tags$li("Chance over 10 years: 10-18%")
-                                   #   )
-                                   # ),
-                                   #
-                                   # checkboxGroupButtons(
-                                   #   inputId = "ID200",
-                                   #   choices = c("200 year flood exposure"),
-                                   #   selected = c("200 year flood exposure"),
-                                   #   checkIcon = list(
-                                   #     yes = tags$i(class = "fa fa-check-square",
-                                   #                  style = "color: #BDD7E7"),
-                                   #     no = tags$i(class = "fa fa-square-o",
-                                   #                 style = "color: #BDD7E7"))
-                                   # ),
-                                   #
-                                   # tags$div(
-                                   #   tags$ul(
-                                   #     tags$li(
-                                   #       tags$b("Low likelihood")
-                                   #     ),
-                                   #     tags$li("Annual Chance: 0.5-1%"),
-                                   #     tags$li("Chance over 10 years: 5-10%")
-                                   #   )
-                                   # )
-                                   #
-                                   #
-                                   #
-                                   
+
+
                                    
                                    #  uiOutput("selected_var"), # reactive text
                                    

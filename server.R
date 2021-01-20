@@ -1,8 +1,6 @@
 # Code adapted in part from the COVID-19 mapper app: https://shiny.rstudio.com/gallery/covid19-tracker.html,
 # and the SuperZIP map: https://shiny.rstudio.com/gallery/superzip-example.html, 
 
-
-
 library(shiny)
 library(leaflet)
 library(RColorBrewer)
@@ -15,38 +13,221 @@ library(htmlwidgets)
 
 ###################### Data import and wrangling ###########################
 
-# Import individual deterministic polygons and  levee lines
 # Note: these polygons were last updated 19 Nov 2020 and were copied in Jan '21 from G:ArcGIS\Projects\CCVA_Flood\DeltaAdapts_Mapping_KG\DeltaAdapts_FloodMap_InputData\201120_FloodMap_Inputs\Deterministic111920
 
-M0 <- read_sf("3_ShinyData/Deterministic/BaseDet.shp") %>% 
+
+
+# Import individual deterministic polygons
+
+M0_det <- read_sf("3_ShinyData/Deterministic/BaseDet.shp") %>% 
   select(NAME, fldfight) %>% 
-  mutate(scenario = "Baseline: 0' SLR") %>% 
+  mutate(Probability = NA) %>% 
+  mutate(scenario = "Deterministic: 0' SLR") %>% 
   st_transform(4326)
 
 M1 <- read_sf("3_ShinyData/Deterministic/HlfDet.shp") %>% 
-  select(NAME, fldfight) %>% 
-  mutate(scenario = "2030: 0.5' SLR") %>%
+  select(NAME, fldfight) %>%
+  mutate(Probability = NA) %>% 
+  mutate(scenario = "Deterministic: 2030, 0.5' SLR") %>%
   st_transform(4326)
 
 M2 <- read_sf("3_ShinyData/Deterministic/OneDet.shp") %>% 
   select(NAME, fldfight) %>% 
-  mutate(scenario = "2050: 1' SLR") %>% 
+  mutate(Probability = NA) %>% 
+  mutate(scenario = "Deterministic: 2050, 1' SLR") %>% 
   st_transform(4326)
 
 M3 <- read_sf("3_ShinyData/Deterministic/TwoDet.shp") %>% 
   select(NAME, fldfight) %>%
-  mutate(scenario = "2050: 2' SLR") %>%
+  mutate(Probability = NA) %>% 
+  mutate(scenario = "Deterministic: 2050, 2' SLR") %>%
   st_transform(4326)
 
 M4 <- read_sf("3_ShinyData/Deterministic/3_5Det.shp") %>% 
   select(NAME, fldfight) %>%
-  mutate(scenario = "2050+: 3.5' SLR") %>%
+  mutate(Probability = NA) %>% 
+  mutate(scenario = "Deterministic: 2050+, 3.5' SLR") %>%
   st_transform(4326)
 
-det_polys <- rbind(M0, M1, M2, M3, M4)
 
-levees <- read_sf("3_ShinyData/Deterministic/leveeOutput11302020.shp") %>% 
+### Probabilistic polygons 
+## Import separate shapefiles and combine 10, 50, 100 and 200 yr exposure polygons for each scenario
+## Then clip each so that they don't overlap (overlap causes shading to become opaque and colors to be misleading)
+
+# M0 - existing conditions
+M0_prob_10 <- read_sf("3_ShinyData/Probabilistic/M010yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% # create a floodfight column so that it can rbind with deterministic polygons
+  mutate(Probability = 10) %>%  # specify flood exposure probability for legend distinction
+  mutate(scenario = "Probabilistic: Existing conditions") %>% # Match to scenario in dropdown menu
+  st_transform(4326) # standardize projection
+
+M0_prob_50 <- read_sf("3_ShinyData/Probabilistic/M050yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 50) %>% 
+  mutate(scenario = "Probabilistic: Existing conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M0_prob_10$NAME)  # clip 
+
+
+M0_prob_100 <- read_sf("3_ShinyData/Probabilistic/M0100yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 100) %>% 
+  mutate(scenario = "Probabilistic: Existing conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M0_prob_10$NAME) %>% # this is very inelegant... could use a better solution to clip out previous polys
+  filter(!NAME %in% M0_prob_50$NAME) 
+
+
+M0_prob_200 <- read_sf("3_ShinyData/Probabilistic/M0200yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>%
+  mutate(Probability = 200) %>% 
+  mutate(scenario = "Probabilistic: Existing conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M0_prob_10$NAME) %>% 
+  filter(!NAME %in% M0_prob_50$NAME) %>% 
+  filter(!NAME %in% M0_prob_100$NAME) 
+
+
+M0_prob <- rbind(M0_prob_10, M0_prob_50, M0_prob_100, M0_prob_200)
+
+
+# M5 - 2030 conditions
+M5_prob_10 <- read_sf("3_ShinyData/Probabilistic/M510yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 10) %>% 
+  mutate(scenario = "Probabilistic: 2030 conditions") %>%
   st_transform(4326)
+
+M5_prob_50 <- read_sf("3_ShinyData/Probabilistic/M550yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 50) %>% 
+  mutate(scenario = "Probabilistic: 2030 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M5_prob_10$NAME) 
+
+
+M5_prob_100 <- read_sf("3_ShinyData/Probabilistic/M5100yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 100) %>% 
+  mutate(scenario = "Probabilistic: 2030 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M5_prob_10$NAME) %>% 
+  filter(!NAME %in% M5_prob_50$NAME) 
+
+
+M5_prob_200 <- read_sf("3_ShinyData/Probabilistic/M5200yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>%
+  mutate(Probability = 200) %>% 
+  mutate(scenario = "Probabilistic: 2030 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M5_prob_10$NAME) %>% 
+  filter(!NAME %in% M5_prob_50$NAME) %>% 
+  filter(!NAME %in% M5_prob_100$NAME) 
+
+
+M5 <- rbind(M5_prob_10, M5_prob_50, M5_prob_100, M5_prob_200)
+
+
+# M6 - 2050 conditions
+M6_prob_10 <- read_sf("3_ShinyData/Probabilistic/M610yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 10) %>% 
+  mutate(scenario = "Probabilistic: 2050 conditions") %>%
+  st_transform(4326)
+
+M6_prob_50 <- read_sf("3_ShinyData/Probabilistic/M650yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 50) %>% 
+  mutate(scenario = "Probabilistic: 2050 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M6_prob_10$NAME) 
+
+  
+
+M6_prob_100 <- read_sf("3_ShinyData/Probabilistic/M6100yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 100) %>% 
+  mutate(scenario = "Probabilistic: 2050 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M6_prob_10$NAME) %>% 
+  filter(!NAME %in% M6_prob_50$NAME) 
+
+
+M6_prob_200 <- read_sf("3_ShinyData/Probabilistic/M6200yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>%
+  mutate(Probability = 200) %>% 
+  mutate(scenario = "Probabilistic: 2050 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M6_prob_10$NAME) %>% 
+  filter(!NAME %in% M6_prob_50$NAME) %>% 
+  filter(!NAME %in% M6_prob_100$NAME) 
+
+
+M6 <- rbind(M6_prob_10, M6_prob_50, M6_prob_100, M6_prob_200)
+
+
+# M7 - 2085 conditions
+M7_prob_10 <- read_sf("3_ShinyData/Probabilistic/M710yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 10) %>% 
+  mutate(scenario = "Probabilistic: 2085 conditions") %>%
+  st_transform(4326)
+
+M7_prob_50 <- read_sf("3_ShinyData/Probabilistic/M750yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 50) %>% 
+  mutate(scenario = "Probabilistic: 2085 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M7_prob_10$NAME) 
+
+
+M7_prob_100 <- read_sf("3_ShinyData/Probabilistic/M7100yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>% 
+  mutate(Probability = 100) %>% 
+  mutate(scenario = "Probabilistic: 2085 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M7_prob_10$NAME) %>% 
+  filter(!NAME %in% M7_prob_50$NAME) 
+
+
+M7_prob_200 <- read_sf("3_ShinyData/Probabilistic/M7200yrpoly.shp") %>% 
+  select(NAME) %>%
+  mutate(fldfight = NA) %>%
+  mutate(Probability = 200) %>% 
+  mutate(scenario = "Probabilistic: 2085 conditions") %>%
+  st_transform(4326) %>% 
+  filter(!NAME %in% M7_prob_10$NAME) %>% 
+  filter(!NAME %in% M7_prob_50$NAME) %>% 
+  filter(!NAME %in% M7_prob_100$NAME) 
+
+
+M7 <- rbind(M7_prob_10, M7_prob_50, M7_prob_100, M7_prob_200)
+
+
+
+
+
+det_prob_polys <- rbind(M0_det, M1, M2, M3, M4, M0_prob, M5, M6, M7)
+
+
+
+#levees <- read_sf("3_ShinyData/Deterministic/leveeOutput11302020.shp") %>% 
+#  st_transform(4326)
 
 
 ############ Import assets 
@@ -159,7 +340,7 @@ prob_legend <- read_csv("3_ShinyData/prob_legend.csv")
 
 
 # Create color palettes
-pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), ordered=TRUE, flood_polys$Probability, na.color="transparent")
+#pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), ordered=TRUE, flood_polys$Probability, na.color="transparent")
 
 nm_pal <- colorFactor(c("#969696"), ordered=TRUE, not_modeled$Modeled, na.color="transparent")
 
@@ -210,7 +391,7 @@ function(input, output, session) {
 
   
   
-############################ Deterministic server logic ############################
+############################ Delta Adapts Scenarios server logic ############################
   
   # Create deterministic basemap
   
@@ -227,24 +408,75 @@ function(input, output, session) {
   })  
 
   filteredData <- reactive({
-    det_polys[det_polys$scenario == input$scenario,]
+    det_prob_polys[det_prob_polys$scenario == input$scenario,]
   })
   
 
   
-  # Draw deterministic polygons
+  
+  # Code for reactice color palettes 
+  # Note: this could probably be condensed since all the deterministic have the same palette and all the probabilistic have the same palette
   observe({
     colorBy <- input$scenario
     
-    if (colorBy == "Baseline: 0' SLR") {
+    if (colorBy == "Deterministic: 0' SLR") {
       colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
       pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
     }
     
-    else { 
+    else if (colorBy == "Deterministic: 2030, 0.5' SLR") {
       colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
       pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
     }
+    
+    else if (colorBy == "Deterministic: 2050, 1' SLR") {
+      colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
+      pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
+    }
+    
+    else if (colorBy == "Deterministic: 2050, 2' SLR") {
+      colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
+      pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
+    }
+    
+    else if (colorBy == "Deterministic: 2050+, 3.5' SLR") {
+      colorData <- ifelse(filteredData()$Probability == 1, "Flooding (mitigable with flood fighting)", "Flooding")
+      pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
+    }
+    
+    else if (colorBy == "Probabilistic: Existing conditions") {
+      colorData <- ifelse(filteredData()$Probability == 10, "1. Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years", 
+                          ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
+                                 ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
+                                        "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
+      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+    }
+    
+    else if (colorBy == "Probabilistic: 2030 conditions") {
+      colorData <- ifelse(filteredData()$Probability == 10, "1. Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years", 
+                          ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
+                                 ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
+                                        "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
+      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+    }
+    
+    else if (colorBy == "Probabilistic: 2050 conditions") {
+      colorData <- ifelse(filteredData()$Probability == 10, "1. Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years", 
+                          ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
+                                 ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
+                                        "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
+      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+    }
+    
+    else { 
+      colorData <- ifelse(filteredData()$Probability == 10, "1. Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years", 
+                          ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
+                                 ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
+                                        "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
+      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+    }
+    
+    
     
     # Create reactive popup text 
 
@@ -326,7 +558,7 @@ function(input, output, session) {
             addLegend("bottomright", 
                       pal=pal, 
                       values=colorData, 
-    #                  title="Social Vulnerability",
+                      title="Flood Exposure Risk",
                       layerId="colorLegend3", 
                       opacity = 0.6,
     #                  group = "Social Vulnerability",
@@ -383,7 +615,7 @@ function(input, output, session) {
   
   
 
-############################# Probabilistic server logic ####################################
+############################# Scenario Explorer server logic ####################################
   
     # Create probabilistic basemap
    

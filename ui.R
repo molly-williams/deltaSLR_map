@@ -9,7 +9,7 @@ library(leaflet)
 
 # Deterministic choices for dropdown:
 
-vars <- c("Deterministic: 0' SLR",
+vars <- c("Deterministic baseline: 0' SLR",
           "Deterministic: 2030, 0.5' SLR",
           "Deterministic: 2050, 1' SLR",
           "Deterministic: 2050, 2' SLR", 

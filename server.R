@@ -9,9 +9,12 @@ library(tidyverse)
 library(rgeos)
 library(sf)
 require(stringr)
-library(htmlwidgets)
+library(rmapshaper)
+library(scales)
+library(shinyalert)
 
 ###################### Data import and wrangling ###########################
+# consider putting this entire section in a separate R file
 
 # Note: these polygons were last updated 19 Nov 2020 and were copied in Jan '21 from G:ArcGIS\Projects\CCVA_Flood\DeltaAdapts_Mapping_KG\DeltaAdapts_FloodMap_InputData\201120_FloodMap_Inputs\Deterministic111920
 
@@ -22,7 +25,7 @@ library(htmlwidgets)
 M0_det <- read_sf("3_ShinyData/Deterministic/BaseDet.shp") %>% 
   select(NAME, fldfight) %>% 
   mutate(Probability = NA) %>% 
-  mutate(scenario = "Deterministic: 0' SLR") %>% 
+  mutate(scenario = "Deterministic baseline: 0' SLR") %>% 
   st_transform(4326)
 
 M1 <- read_sf("3_ShinyData/Deterministic/HlfDet.shp") %>% 
@@ -220,28 +223,251 @@ M7 <- rbind(M7_prob_10, M7_prob_50, M7_prob_100, M7_prob_200)
 
 
 
-
+# Join polygons for all 9 scenarios 
 
 det_prob_polys <- rbind(M0_det, M1, M2, M3, M4, M0_prob, M5, M6, M7)
 
 
+# Join polygons with tabular data by island for population, asset value ($) and area (square miles)
+# From Delta Adapts sharepoint page, updated ~Jan 26 2021
+# https://deltacouncil.sharepoint.com/sites/DeltaAdaptsProject/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=SCeQzl&cid=3e2f8e57%2Dbb67%2D44b1%2D840e%2D594ef83cb5fc&RootFolder=%2Fsites%2FDeltaAdaptsProject%2FShared%20Documents%2FData%20and%20Modeling%2FFlooding%20Analysis&FolderCTID=0x01200090DD54C0503D78468E7D9D752120A071
 
-#levees <- read_sf("3_ShinyData/Deterministic/leveeOutput11302020.shp") %>% 
-#  st_transform(4326)
+
+island_data <- read_csv("3_ShinyData/island_data.csv") 
+
+det_prob_polys <- merge(det_prob_polys, island_data, all=TRUE) %>% 
+  drop_na("scenario")
 
 
 ############ Import assets 
 # Note: these data came from AECOM's DSC Asset Output folder on sharepoint from Dec 2020. 
 
-#### Transportation infrastructure
+
+# Agriculture
+# ag_delta <- read_sf("3_ShinyData/Assets/ag_delta.shp") %>%
+#  select(Type=Subclass, geometry) %>%
+#  filter(Type !="Water") %>%
+#  filter(Type != "Urban") %>%
+#  filter(Type != "Riparian") %>%
+#  filter(Type != "Semi-agricultural/ROW") %>%
+#  filter(Type != "Upland Herbaceous") %>%
+#  filter(Type != "Wet herbaceous/sub irrigated pasture") %>%
+#  filter(Type != "Summer Fallow") %>%
+#  st_transform(4326) %>%
+#  st_zm()
+# 
+# ag_suisun <- read_sf("3_ShinyData/Assets/ag_suisun.shp") %>%
+#  select(Type=Crop2016, geometry) %>%
+#  filter(Type !="Idle") %>%
+#  filter(Type != "Urban") %>%
+#  filter(Type != "Managed Wetland") %>%
+#  st_transform(4326) %>%
+#  st_zm()
+# 
+# # combine and simplify to reduce filesize
+# ag_polys <- rbind(ag_delta, ag_suisun) %>%
+#  rmapshaper::ms_simplify() %>%
+#  st_as_sf() %>%
+  
+#st_write(ag_polys, dsn = "3_ShinyData/Assets/ag_combined_simp.shp", layer = "", driver = "ESRI Shapefile" )
+
+
+# ^^ Ran all of this then exported the sf object to a new simplified shapefile and deleted the other files in order to save space in the directory
+
+ag_polys <- read_sf("3_ShinyData/Assets/ag_combined_simp.shp")
+
+
+# Communications
+cell_towers <- read_sf("3_ShinyData/Assets/cell_towers.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Cell Tower") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+comm_facilities <- read_sf("3_ShinyData/Assets/comm_facilities.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Communications Facility") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+data_centers <- read_sf("3_ShinyData/Assets/data_centers.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Data Center") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+comm_points <- rbind(cell_towers, comm_facilities, data_centers)
+
+
+# Cultural resources
+
+legacy_towns <- read_sf("3_ShinyData/Assets/legacy_towns.shp") %>% 
+  select(Type = FacType, geometry) %>%
+  st_transform(4326) %>% 
+  st_zm()
+
+historic_places <- read_sf("3_ShinyData/Assets/historic_places.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Historic Place") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+historic_landmarks <- read_sf("3_ShinyData/Assets/historic_landmarks.shp") %>% 
+  select(Type = FacType, geometry) %>%
+  st_transform(4326) %>% 
+  st_zm()
+
+cultural_points <- rbind(legacy_towns, historic_places, historic_landmarks)
+
+
+# Critical facilities
+police <- read_sf("3_ShinyData/Assets/police.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Police station") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+hospitals <- read_sf("3_ShinyData/Assets/hospitals.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Hospital") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+fire_stations <- read_sf("3_ShinyData/Assets/fire_stations.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Fire station") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+wastewater_plants <- read_sf("3_ShinyData/Assets/wastewater_tp.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Wastewater Treatment Plant") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+public_schools <- read_sf("3_ShinyData/Assets/public_schools.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Public School") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+private_schools <- read_sf("3_ShinyData/Assets/private_schools.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Private School") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+critical_points <- rbind(police, hospitals, fire_stations, wastewater_plants, public_schools, private_schools)
+
+
+# Energy
+
+active_wells <- read_sf("3_ShinyData/Assets/energy_active_wells.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Active Oil Well") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+gas_storage <- read_sf("3_ShinyData/Assets/energy_gas_storage.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Gas Storage Facility") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+natural_gas <- read_sf("3_ShinyData/Assets/energy_natural_gas.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Natural Gas Station") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+power_plants <- read_sf("3_ShinyData/Assets/energy_power_plants.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Power Plant") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+substations <- read_sf("3_ShinyData/Assets/energy_substations.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Substation") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+#transmission_towers <- read_sf("3_ShinyData/Assets/energy_transmission_line_towers.shp") %>% 
+#  select(geometry) %>%
+#  mutate(Type = "Transmission Tower") %>% 
+#  st_transform(4326)
+# not using since they follow the transmission lines
+
+energy_points <- rbind(active_wells, gas_storage, natural_gas, power_plants, substations)
+
+
+oil_pipelines <- read_sf("3_ShinyData/Assets/energy_oil_pipelines.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Oil Pipeline") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+natgas_pipeline <- read_sf("3_ShinyData/Assets/energy_natural_gas_pipelines.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Natural Gas Pipeline") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+transmission_lines <- read_sf("3_ShinyData/Assets/energy_trans_lines.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Transmission Lines") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+energy_lines <- rbind(oil_pipelines, natgas_pipeline, transmission_lines)
+
+
+# Recreation
+
+campgrounds <- read_sf("3_ShinyData/Assets/campgrounds.shp") %>% 
+  select(geometry) %>% 
+  mutate(Type = "Campground") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+state_parks <- read_sf("3_ShinyData/Assets/stateparks.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "State Park") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+county_parks <- read_sf("3_ShinyData/Assets/county_parks.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Regional Park") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+city_parks <- read_sf("3_ShinyData/Assets/city_parks.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "City Park") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+rec_points <- rbind(campgrounds, state_parks, county_parks, city_parks)
+
+rec_lines <- read_sf("3_ShinyData/Assets/trails.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Trails") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+
+# Transportation infrastructure
 airstrips <- read_sf("3_ShinyData/Assets/trans_airstrips.shp") %>% 
   select(Type=SOURCE_D_1, geometry) %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
 
 bridges <- read_sf("3_ShinyData/Assets/trans_bridges.shp") %>% 
   select(geometry) %>% 
   mutate(Type="Bridge") %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
 
 trans_points <- rbind(airstrips, bridges)
 
@@ -249,31 +475,89 @@ trans_points <- rbind(airstrips, bridges)
 scenic_hwys <- read_sf("3_ShinyData/Assets/trans_scenic_hwys.shp") %>% 
   select(geometry) %>% 
   mutate(Type="Scenic Highway") %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
 
 county_hwys <- read_sf("3_ShinyData/Assets/trans_county_highways.shp") %>% 
   select(geometry) %>% 
   mutate(Type="County Highway") %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
   
 highways <- read_sf("3_ShinyData/Assets/trans_highways.shp") %>% 
   select(geometry) %>% 
   mutate(Type="Highway") %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
   
 railroads <- read_sf("3_ShinyData/Assets/trans_railroads.shp") %>% 
   select(geometry) %>% 
   mutate(Type="Railroad") %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
 
 bike_routes <- read_sf("3_ShinyData/Assets/trans_bike_routes.shp") %>% 
   select(geometry) %>% 
   mutate(Type="Bike Route") %>% 
-  st_transform(4326)
+  st_transform(4326) %>% 
+  st_zm()
 
-trans_lines <- rbind(county_hwys, scenic_hwys) # not working????
+trans_lines <- rbind(county_hwys, scenic_hwys, highways, railroads, bike_routes)
 
-#### Energy 
+
+# Waste facilities 
+
+solid_waste <- read_sf("3_ShinyData/Assets/solid_waste.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Solid Waste Facility") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+
+haz_waste <- read_sf("3_ShinyData/Assets/haz_waste.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Hazardous Waste Facility") %>% 
+  st_transform(4326) %>% 
+  st_zm() # removes third coordinate to match solid_waste
+
+
+contam_sites <-  read_sf("3_ShinyData/Assets/contaminated_sites.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Contaminated Site") %>% 
+  st_transform(4326) %>% 
+  st_zm() # removes third coordinate
+
+
+waste_points <- rbind(solid_waste, haz_waste, contam_sites) 
+
+
+# Water conveyance
+
+water_conveyance <- read_sf("3_ShinyData/Assets/water_conveyance.shp") %>% 
+  select(geometry) %>%
+  mutate(Type = "Water Conveyance") %>% 
+  st_transform(4326) %>% 
+  st_zm()
+
+
+
+
+#### Assign html tags to asset groups (for cleaner code and easier changes)
+
+ag_group <- HTML('<i class="fa fa-square"; style="font-size:120%; color:#B9F3A8; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Agriculture')
+comm_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#CF2D2D; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Communications facilities')
+critical_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#F44AA9; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Critical facilities: police and fire stations, hospitals, schools, water treatment')
+cultural_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:orange; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Cultural resources: legacy towns, historic places, landmarks')
+energy_point_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:purple; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Energy: power plants, gas storage, oil wells, stations')
+energy_line_group <- HTML('<i class="fas fa-minus"; style="font-size:120%; color:purple; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Energy: oil and natural gas pipelines, transmission lines')
+rec_point_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#249729; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Recreation: campgrounds and parks')
+rec_line_group <- HTML('<i class="fas fa-minus"; style="font-size:120%; color:#249729; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Recreation: trails')
+trans_point_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Transportation: airstrips and bridges')
+trans_line_group <- HTML('<i class="fas fa-minus"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Transportation: highways, railroads and bike routes')
+waste_group <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#E0CC5F; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Waste Sites: solid, hazardous, and contaminated sites ')
+water_group <- HTML('<i class="fas fa-minus"; style="font-size:120%; color:blue; margin-top:3px;"></i><span style="font-size:100%; color:black;padding-left:5px;"> Water conveyance')
+
+
 
 ############## Import combined simplified probabilistic polygons
 # Note: these polygons are outputs from the overtopping analysis script in this repository
@@ -314,6 +598,16 @@ flood_polys200 <- flood_polys %>%
   filter(Probability == "200 year flood exposure")
 
 
+
+#### Assign html tags to flood poly groups based on probability
+
+group_10 <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#08306B; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years')
+group_50 <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#08519C; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  High likelihood | 2-10% annual chance | 18-65% chance over 10 years')
+group_100 <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#2171B5;margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years')
+group_200 <- HTML('<i class="fa fa-circle"; style="font-size:120%; color:#6BAED6;margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  Low likelihood | 0.5-1% annual chance | 5-10% chance over 10 years')
+
+
+
 # Add Delta + Suisun Marsh boundary shapefile and reproject
 delta_sm <- read_sf("3_ShinyData/LD_SM_Merged.shp") %>% 
   st_transform(4326) 
@@ -328,15 +622,12 @@ not_modeled <- read_sf("3_ShinyData/NotModeled_201001.shp") %>%
 sovi <- read_sf("3_ShinyData/sovi_simp.shp") %>% 
   select("Vulnerability" = Vlnrblt, "Rating"=VULNBLT) %>% 
   st_transform(4326)
-
+# clip to Delta SM boundary?
 
 ################### Create palettes and popup text ###############
 
-colorData <- ifelse(sovi$Vulnerability == 1, "1: Moderate", ifelse(sovi$Vulnerability == 2, "2: High", "3: Highest"))  
-sovi_pal <- colorFactor("Reds", colorData)
-
-# Import probability category table
-prob_legend <- read_csv("3_ShinyData/prob_legend.csv")
+s_colorData <- ifelse(sovi$Vulnerability == 1, "1: Moderate", ifelse(sovi$Vulnerability == 2, "2: High", "3: Highest"))  
+sovi_pal <- colorFactor("Reds", s_colorData)
 
 
 # Create color palettes
@@ -382,14 +673,6 @@ function(input, output, session) {
 #    }, ignoreNULL = FALSE)
 
 
-  # Render table in sidebar
-  
-  output$table <- renderTable(prob_legend,
-                              striped=TRUE,
-                              spacing="xs") 
-
-
-  
   
 ############################ Delta Adapts Scenarios server logic ############################
   
@@ -419,7 +702,7 @@ function(input, output, session) {
   observe({
     colorBy <- input$scenario
     
-    if (colorBy == "Deterministic: 0' SLR") {
+    if (colorBy == "Deterministic baseline: 0' SLR") {
       colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
       pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
     }
@@ -439,17 +722,17 @@ function(input, output, session) {
       pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
     }
     
-    else if (colorBy == "Deterministic: 2050+, 3.5' SLR") {
-      colorData <- ifelse(filteredData()$Probability == 1, "Flooding (mitigable with flood fighting)", "Flooding")
-      pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
-    }
+     else if (colorBy == "Deterministic: 2050+, 3.5' SLR") {
+       colorData <- ifelse(filteredData()$fldfight == 1, "Flooding (mitigable with flood fighting)", "Flooding")
+       pal <- colorFactor(c("#08519C", "#6BAED6"), colorData) 
+     }
     
     else if (colorBy == "Probabilistic: Existing conditions") {
       colorData <- ifelse(filteredData()$Probability == 10, "1. Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years", 
                           ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
                                  ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
                                         "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
-      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+      pal <- colorFactor(c("#08306B", "#08519C", "#2171B5", "#6BAED6"), colorData) 
     }
     
     else if (colorBy == "Probabilistic: 2030 conditions") {
@@ -457,7 +740,7 @@ function(input, output, session) {
                           ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
                                  ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
                                         "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
-      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+      pal <- colorFactor(c("#08306B", "#08519C", "#2171B5", "#6BAED6"), colorData) 
     }
     
     else if (colorBy == "Probabilistic: 2050 conditions") {
@@ -465,7 +748,7 @@ function(input, output, session) {
                           ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
                                  ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
                                         "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
-      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+      pal <- colorFactor(c("#08306B", "#08519C", "#2171B5", "#6BAED6"), colorData) 
     }
     
     else { 
@@ -473,7 +756,7 @@ function(input, output, session) {
                           ifelse(filteredData()$Probability == 50, "2. High likelihood | 18-65% chance over 10 years | 2-10% annual chance",
                                  ifelse(filteredData()$Probability == 100, "3. Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years", 
                                         "4. Low Likelihood | 0.5-1% annual chance | 5-10% chance over 10 years")))
-      pal <- colorFactor(c("#08519C", "#3182BD", "#6BAED6", "#BDD7E7"), colorData) 
+      pal <- colorFactor(c("#08306B", "#08519C", "#2171B5", "#6BAED6"), colorData) 
     }
     
     
@@ -481,13 +764,15 @@ function(input, output, session) {
     # Create reactive popup text 
 
       
-    det_popup <- paste(
+    det_prob_popup <- paste(
       "<span style='font-size: 120%'><strong>", filteredData()$NAME,"</strong></span><br/>", 
-      "Population: ", #comma(filteredData()$pop), 
-      "<br/>",
-      "Area: ", #comma(filteredData()$area), 
+      "<strong>", "Area (square miles): ", "</strong>", filteredData()$area, 
       "<br/>", 
-      "Asset value: ", #dollar(filteredData()$assets), 
+      "<strong>", "Population: ", "</strong>", format(round(as.numeric(filteredData()$total_pop), 0), nsmall=0, big.mark=","), 
+      "<br/>",
+      "<strong>", "Socially Vulnerable Population: ", "</strong>", format(round(as.numeric(filteredData()$svi_pop), 0), nsmall=0, big.mark=","), 
+      "<br/>",
+      "<strong>", "Asset value: ", "</strong>", #dollar(filteredData()$assets), 
       "<br/>",
       sep="") %>%
       lapply(htmltools::HTML)
@@ -496,16 +781,15 @@ function(input, output, session) {
     leafletProxy("map2") %>%
       clearShapes() %>% 
       
-
+      ## Add flood polygons
        addPolygons(data=filteredData(),
                    fillColor=pal(colorData),
-                   fillOpacity=0.6,
+                   fillOpacity=0.8,
                    stroke = T,
                    color="black",
                    weight=0.8,
-                #   label=filteredData()$NAME
-                   popup=det_popup # for some reason this is changing opacity of the polygons? 
-                   
+                   group = "Flood Exposure Risk Regions",
+                   popup=det_prob_popup  
                    ) %>% 
      
       ## Delta boundary
@@ -515,18 +799,19 @@ function(input, output, session) {
                   color="black", # polygon border color
                   weight=4, # polygon border weight
                   group = "Delta + Suisun Marsh Boundary"
-      ) %>% 
+                  ) %>% 
       
       ## Social vulnerability data
-      #         addPolygons(data=sovi, 
-      #                       fillColor=sovi_pal(colorData),
-      #                       fillOpacity = 0.5,
-      #                       stroke=T, 
-      #                       color="black", # polygon border color
-      #                       weight=0.8, # polygon border weight
-      #                       label=paste(sovi$Rating),
-      #                       group = "Social Vulnerability") %>% 
-      
+      addPolygons(data=sovi,
+                  fillColor=sovi_pal(s_colorData),
+                  fillOpacity = 0.4,
+                  stroke=T,
+                  color="black", # polygon border color
+                  weight=0.8, # polygon border weight
+                  label=sovi$Rating,
+                  group = "Social Vulnerability"
+                  ) %>%
+                
     
     ## Not-modeled polygons
     addPolygons(data=not_modeled, 
@@ -535,18 +820,17 @@ function(input, output, session) {
                 stroke=T,  
                 color="black", # polygon border color
                 weight=0.8, # polygon border weight
-                label=paste("Not Modeled"),
+                popup=paste("Not Modeled"),
                 group = "Regions Not Modeled"
-    ) %>% 
+                ) %>% 
     
       
       # Add legends  
       addLegend("bottomright", 
                 pal=nm_pal, 
                 values=not_modeled$Modeled, 
-                layerId="colorLegend2", 
-                # group="Regions Not Modeled",
-                opacity = 1,
+                layerId="colorLegend1", # layerid prevents legend from duplicating whenever you redraw the map with a new selection
+                opacity = 0.7,
                 labFormat = labelFormat(prefix = "", 
                                         suffix = "", 
                                         between = " - ", 
@@ -554,30 +838,134 @@ function(input, output, session) {
       ) %>% 
 
     
-    
-            addLegend("bottomright", 
-                      pal=pal, 
-                      values=colorData, 
-                      title="Flood Exposure Risk",
-                      layerId="colorLegend3", 
-                      opacity = 0.6,
-    #                  group = "Social Vulnerability",
-                      labFormat = labelFormat(prefix = "", 
+    # Flooding legend
+    addLegend("bottomright",
+              pal=pal, 
+              values=colorData, 
+              title="Flood Exposure Risk",
+              layerId="colorLegend2", 
+              opacity = 0.8,
+              group = "Flood Exposure Risk Regions",
+              labFormat = labelFormat(prefix = "", 
                                               suffix = "", 
                                               between = " - ", 
                                               digits = 0)
           ) %>% 
+      # Vulnerability legend - still reappearing when scenario is switched even if group is not selected?
+      addLegend("bottomright",
+                pal=sovi_pal,
+                values=s_colorData,
+                title="Social Vulnerability",
+                layerId="colorLegend3",
+                opacity = 0.4,
+                group = "Social Vulnerability",
+                labFormat = labelFormat(prefix = "",
+                                        suffix = "",
+                                        between = " - ",
+                                        digits = 0)
+      ) %>%
+      
+
+
+
+      # Add polygon and point data for assets
+
+      addPolygons(data=ag_polys, 
+                  fillColor="#B9F3A8",
+                  fillOpacity = 0.5,
+                  stroke=T,  
+                  color="black", # polygon border color
+                  weight=0.8, # polygon border weight
+                  group = ag_group,
+                  label=ag_polys$Type
+      ) %>% 
+      
+      addCircles(data=comm_points,
+                 radius = 75,
+                 opacity=0.8,
+                 color="#CF2D2D",
+                 group = comm_group,
+                 label = comm_points$Type
+      ) %>% 
+      
+      addCircles(data=critical_points,
+                 radius = 75,
+                 opacity=0.8,
+                 color="#F44AA9",
+                 group = critical_group,
+                 label = critical_points$Type
+      ) %>% 
+      
+      addCircles(data=cultural_points,
+                 radius = 75,
+                 opacity=0.8,
+                 color="orange",
+                 group = cultural_group, 
+                 label = cultural_points$Type
+      ) %>% 
       
       
-      # Add point data
+      addCircles(data=energy_points,
+                 radius = 75,
+                 opacity=0.8,
+                 color="purple",
+                 group = energy_point_group,
+                 label = energy_points$Type
+      ) %>% 
+      
+      addCircles(data=rec_points,
+                 radius = 75,
+                 opacity=0.8,
+                 color="#249729",
+                 group = rec_point_group, 
+                 label = rec_points$Type
+      ) %>% 
+      
       addCircles(data=trans_points,
-                 radius = 6,
+                 radius = 75,
+                 opacity=0.8,
                  color="black",
-                 group = HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Transportation: Airstrips and Bridges'),
+                 group = trans_point_group,
                  label = trans_points$Type
-                 ) %>% 
-    
-    
+      ) %>% 
+      
+      addCircles(data=waste_points,
+                 radius = 75,
+                 opacity=0.8,
+                 color="#E0CC5F",
+                 group = waste_group,
+                 label = waste_points$Type
+      ) %>% 
+      
+      # Add lines data for assets
+
+      addPolylines(data=energy_lines,
+                   weight = 2,
+                   color="purple",
+                   group = energy_line_group,
+                   label = energy_lines$Type
+      ) %>% 
+      
+      addPolylines(data=rec_lines,
+                   weight = 2,
+                   color="green",
+                   group = rec_line_group,
+                   label = rec_lines$Type
+      ) %>% 
+      
+      addPolylines(data=trans_lines,
+                   weight = 2,
+                   color="black",
+                   group = trans_line_group,
+                   label = trans_lines$Type
+      ) %>% 
+
+      addPolylines(data=water_conveyance,
+                   weight = 2,
+                   color="blue",
+                   group=water_group,
+                   label = water_conveyance$Type
+      ) %>% 
     
     ## County boundaries 
     #           addPolygons(data=delta_counties, 
@@ -591,24 +979,39 @@ function(input, output, session) {
   
       # add layer control panel 
     addLayersControl(
-      #    baseGroups = c("Basemap"),
-      overlayGroups = c(HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Transportation: Airstrips and Bridges')
-                        #,
-                    #    "Asset Category 2",
-                     #   "Asset Category 3"
-                    ),
-      position = "topright",
-      options = layersControlOptions(collapsed = FALSE)
-    )  %>% 
-      htmlwidgets::onRender("
-        function() {
-            $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:center\">My Epic Title</label>');
-        }
-    ") %>%         
-        hideGroup(HTML('<i class="fa fa-circle"; style="font-size:120%; color:black; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Transportation: Airstrips and Bridges')
-                          )
+      overlayGroups = c(
+        ag_group,
+        comm_group,
+        critical_group, 
+        cultural_group,
+        energy_point_group,
+        energy_line_group,
+        rec_point_group, 
+        rec_line_group,
+        trans_point_group,
+        trans_line_group, 
+        waste_group,
+        water_group,
+        "Flood Exposure Risk Regions",
+        "Social Vulnerability"
+                        ),
       
-     
+      position = "topright",
+      
+      options = layersControlOptions(collapsed = FALSE))  %>%  # Add legend here?       
+        hideGroup(ag_group) %>% 
+        hideGroup(comm_group) %>% 
+        hideGroup(critical_group) %>% 
+        hideGroup(cultural_group) %>%
+        hideGroup(energy_point_group) %>% 
+        hideGroup(energy_line_group) %>% 
+        hideGroup(rec_point_group) %>% 
+        hideGroup(rec_line_group) %>% 
+        hideGroup(trans_point_group) %>% 
+        hideGroup(trans_line_group) %>% 
+        hideGroup(waste_group) %>% 
+        hideGroup(water_group) %>% 
+        hideGroup("Social Vulnerability") 
     
     
   })
@@ -661,14 +1064,14 @@ function(input, output, session) {
       
                     
            addPolygons(data=filteredData10(), 
-                        fillColor="#08519C", 
-                        fillOpacity = 0.3, 
+                        fillColor="#08306B", 
+                        fillOpacity = 1, 
                        stroke=T, # add border 
                        color="black", # polygon border color
                         weight=0.3, # polygon border weight
                        label = popup_text10,  # info on hover
                        #popup = popup_text10, # info on click
-                        group = HTML('<i class="fa fa-circle"; style="font-size:120%; color:#08519C; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years'),
+                        group = group_10,
                         options = pathOptions(pane = "ten")
               
                    
@@ -694,40 +1097,40 @@ function(input, output, session) {
 
 
            addPolygons(data=filteredData50(), 
-                       fillColor="#3182BD", 
+                       fillColor="#08519C", 
                        stroke=T, 
-                       fillOpacity = 0.5, 
+                       fillOpacity = 1, 
                        color="black", # polygon border color
                        weight=0.3, # polygon border weight
                        label = popup_text50,
                        #popup = popup_text50,
-                       group =  HTML('<i class="fa fa-circle"; style="font-size:120%; color:#3182BD; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  High likelihood | 2-10% annual chance | 18-65% chance over 10 years'),
+                       group =  group_50,
                        options = pathOptions(pane = "fifty")
                        ) %>% 
 
 
            addPolygons(data=filteredData100(), 
-                       fillColor= "#6BAED6", 
+                       fillColor= "#2171B5", 
                        stroke=T, 
-                       fillOpacity = 0.5, 
+                       fillOpacity = 1, 
                        color="black", # polygon border color
                        weight=0.3, # polygon border weight
                        label = popup_text100,
                        #popup = popup_text100,
-                       group = HTML('<i class="fa fa-circle"; style="font-size:120%; color:#6BAED6;margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years'),
+                       group = group_100,
                        options = pathOptions(pane = "hun")
                        ) %>% 
         
 
            addPolygons(data=filteredData200(), 
-                       fillColor="#BDD7E7", 
+                       fillColor="#6BAED6", 
                        stroke=T, 
-                       fillOpacity = 0.5, 
+                       fillOpacity = 1, 
                        color="black", # polygon border color
                        weight=0.3, # polygon border weight
                        label = popup_text200,
                        #popup = popup_text200,
-                       group = HTML('<i class="fa fa-circle"; style="font-size:120%; color:#BDD7E7;margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  Low likelihood | 0.5-1% annual chance | 5-10% chance over 10 years'),
+                       group = group_200,
                        options = pathOptions(pane = "twohun")
                        ) %>% 
   
@@ -746,16 +1149,7 @@ function(input, output, session) {
                     group = "Delta + Suisun Marsh Boundary"
                     ) %>% 
         
-      ## Social vulnerability data
-#         addPolygons(data=sovi, 
-#                       fillColor=sovi_pal(colorData),
-#                       fillOpacity = 0.5,
-#                       stroke=T, 
-#                       color="black", # polygon border color
-#                       weight=0.8, # polygon border weight
-#                       label=paste(sovi$Rating),
-#                       group = "Social Vulnerability") %>% 
-           
+
 
         ## Not-modeled polygons
         addPolygons(data=not_modeled, 
@@ -779,31 +1173,7 @@ function(input, output, session) {
                                           between = " - ", 
                                           digits = 0)
         ) %>%
-        
-#        addLegend("bottomright", 
-#                  pal=pal, 
-#                  values=flood_polys$Probability, 
- #                 title="Flood Exposure Probability",
-#                  layerId="colorLegend1",
-#                  opacity = 1,
-#                  labFormat = labelFormat(prefix = "", 
-#                                          suffix = "", 
-#                                          between = " - ", 
-#                                          digits = 0)
-#        )# %>%
-        
-#        addLegend("bottomright", 
-#                  pal=sovi_pal, 
-#                  values=colorData, 
-#                  title="Social Vulnerability",
-#                  layerId="colorLegend3", 
-#                  opacity = 0.5,
-#                  group = "Social Vulnerability",
-#                  labFormat = labelFormat(prefix = "", 
-#                                          suffix = "", 
-#                                          between = " - ", 
-#                                          digits = 0)
- #      ) %>%
+
         
         
              ## County boundaries 
@@ -819,10 +1189,10 @@ function(input, output, session) {
             addLayersControl(
                 #    baseGroups = c("Basemap"),
                 overlayGroups = c(
-                  HTML('<i class="fa fa-circle"; style="font-size:120%; color:#08519C; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;"> Very high likelihood | 10%+ annual chance | 65%+ chance over 10 years'),
-                  HTML('<i class="fa fa-circle"; style="font-size:120%; color:#3182BD; margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  High likelihood | 2-10% annual chance | 18-65% chance over 10 years'),
-                  HTML('<i class="fa fa-circle"; style="font-size:120%; color:#6BAED6;margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  Medium likelihood | 1-2% annual chance | 10-18% chance over 10 years'),
-                  HTML('<i class="fa fa-circle"; style="font-size:120%; color:#BDD7E7;margin-top:3px;"></i><span style="font-size:110%; color:black;padding-left:5px;">  Low likelihood | 0.5-1% annual chance | 5-10% chance over 10 years') #,
+                  group_10,
+                  group_50,
+                  group_100,
+                  group_200
                  #"Delta + Suisun Marsh Boundary"#,
                  #"Regions Not Modeled",
                  #"Social Vulnerability"
@@ -831,8 +1201,6 @@ function(input, output, session) {
               position = "topright",
                 options = layersControlOptions(collapsed = FALSE)
                 )  
-            #%>% 
-#            hideGroup("Social Vulnerability")
 
         
     })

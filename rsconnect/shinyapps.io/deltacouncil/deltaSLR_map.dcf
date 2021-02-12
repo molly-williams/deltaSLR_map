@@ -1,0 +1,13 @@
+name: deltaSLR_map
+title: deltaSLR_map
+username:
+account: deltacouncil
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3181965
+bundleId: 4215740
+url: https://deltacouncil.shinyapps.io/deltaSLR_map/
+when: 1613152753.0924
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: delta_scenarios_tutorial.png|easyprint_example.R|exported_map.png|README.md|unzip_sf_clip_example.R|www/dsc_logo_crop.png|1_WSEs|2_OvertopAnalysis|foo|old shiny scripts

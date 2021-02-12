@@ -1,0 +1,21 @@
+﻿County,Scenario,Probability,Population,Vulnerable Population,Area,Assets_structural,Assets_infrastructure,Economic_activity
+Contra Costa,Probabilistic: Existing conditions,200,460,282,0.8,,,
+Sacramento,Probabilistic: Existing conditions,200,0,0,2.6,,,
+San Joaquin,Probabilistic: Existing conditions,200,11023,3924,97.5,,,
+Solano,Probabilistic: Existing conditions,200,92,0,86.5,,,
+Yolo,Probabilistic: Existing conditions,200,0,0,0.2,,,
+Contra Costa,Probabilistic: 2030 conditions,200,1177,952,2.2,"$18,107,000 ","$123,727,000 ","$46,608,000 "
+Sacramento,Probabilistic: 2030 conditions,200,0,0,2.6,"$33,000 ","$6,852,000 ",$0 
+San Joaquin,Probabilistic: 2030 conditions,200,11035,3930,97.8,"$233,644,000 ","$1,700,543,000 ","$137,934,000 "
+Solano,Probabilistic: 2030 conditions,200,149,0,91.7,"$9,270,000 ","$348,117,000 ","$18,302,000 "
+Yolo,Probabilistic: 2030 conditions,200,0,0,0.2,$0 ,$0 ,$0 
+Contra Costa,Probabilistic: 2050 conditions,200,4022,1607,41.6,"$297,667,000 ","$294,043,000 ","$181,189,000 "
+Sacramento,Probabilistic: 2050 conditions,200,1555,1519,49.5,"$87,268,000 ","$666,552,000 ","$90,629,000 "
+San Joaquin,Probabilistic: 2050 conditions,200,69637,43426,307.5,"$3,427,981,000 ","$5,739,821,000 ","$1,546,677,000 "
+Solano,Probabilistic: 2050 conditions,200,153,0,92.7,"$9,749,000 ","$365,279,000 ","$23,109,000 "
+Yolo,Probabilistic: 2050 conditions,200,0,0,0.2,$0 ,$0 ,$0 
+Contra Costa,Probabilistic: 2085 conditions,200,22629,5524,70.2,,,
+Sacramento,Probabilistic: 2085 conditions,200,55932,30721,75.5,,,
+San Joaquin,Probabilistic: 2085 conditions,200,194743,98565,401.9,,,
+Solano,Probabilistic: 2085 conditions,200,917,0,127,,,
+Yolo,Probabilistic: 2085 conditions,200,218,0,9.9,,,

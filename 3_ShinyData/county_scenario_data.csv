@@ -1,29 +1,29 @@
 ﻿County,Scenario,Probability,Population,Vulnerable Pop.,Pop. in socially vulnerable area,Area (sq miles),Structural assets ($)*,Infrastructure assets ($)**,Annual economic activity ($)***
-Contra Costa,Deterministic baseline: 0' SLR,,282,282,100%,0.1,no data,no data,no data
-Sacramento,Deterministic baseline: 0' SLR,,0,0,NA,2.6,no data,no data,no data
-San Joaquin,Deterministic baseline: 0' SLR,,9012,2945,33%,72,no data,no data,no data
-Solano,Deterministic baseline: 0' SLR,,92,0,0,85.2,no data,no data,no data
-Yolo,Deterministic baseline: 0' SLR,,0,0,NA,0.2,no data,no data,no data
-Contra Costa,"Deterministic: 2030, 0.5' SLR",,1177,952,81%,2.2,55.5 million,"187,873","108,909"
-Sacramento,"Deterministic: 2030, 0.5' SLR",,0,0,0,2.6,"33,000","6,852",0
-San Joaquin,"Deterministic: 2030, 0.5' SLR",,9012,2945,33%,72,233.6 million,1.7 million,"137,934"
-Solano,"Deterministic: 2030, 0.5' SLR",,92,0,0,87.7,9.3 million,"348,161","18,303"
-Yolo,"Deterministic: 2030, 0.5' SLR",,0,0,NA,0.2,0,157,0
-Contra Costa,"Deterministic: 2050, 1' SLR",,2955,1414,48%,21.7,298 million,"294,043","181,189"
-Sacramento,"Deterministic: 2050, 1' SLR",,1389,1389,100%,41.9,87.2 million,"667,565","90,629"
-San Joaquin,"Deterministic: 2050, 1' SLR",,61254,40007,65%,236.2,3.4 billion,5.74 million,1.5 million
-Solano,"Deterministic: 2050, 1' SLR",,153,0,0,92.5,9.7 million,"365,279","23,109"
-Yolo,"Deterministic: 2050, 1' SLR",,0,0,NA,0.2,0,157,0
-Contra Costa,"Deterministic: 2050, 2' SLR",,10095,3644,36%,52.7,1.03 billion,1.36 million,"513,546"
-Sacramento,"Deterministic: 2050, 2' SLR",,1562,1562,100%,58.1,95.9 million,"808,391","91,190"
-San Joaquin,"Deterministic: 2050, 2' SLR",,63416,42099,66%,317.4,3.5 billion,7.15 million,1.7 million
-Solano,"Deterministic: 2050, 2' SLR",,183,0,0,93.3,12 million,"369,140","23,116"
-Yolo,"Deterministic: 2050, 2' SLR",,0,0,NA,0.2,0,157,0
-Contra Costa,"Deterministic: 2050+, 3.5' SLR",,21398,5116,24%,69.7,2.75 billion,2.22 million,"888,835"
-Sacramento,"Deterministic: 2050+, 3.5' SLR",,1728,1692,98%,66.1,119 million,"835,368","98,990"
-San Joaquin,"Deterministic: 2050+, 3.5' SLR",,131853,66732,51%,388.3,7.3 billion,7.78 million,4.1 million
-Solano,"Deterministic: 2050+, 3.5' SLR",,917,0,0,124.2,19.6 million,"696,689","24,108"
-Yolo,"Deterministic: 2050+, 3.5' SLR",,0,0,NA,0.2,0,157,0
+Contra Costa,Deterministic baseline: 0' SLR,NA,282,282,100%,0.1,no data,no data,no data
+Sacramento,Deterministic baseline: 0' SLR,NA,0,0,NA,2.6,no data,no data,no data
+San Joaquin,Deterministic baseline: 0' SLR,NA,9012,2945,33%,72,no data,no data,no data
+Solano,Deterministic baseline: 0' SLR,NA,92,0,0,85.2,no data,no data,no data
+Yolo,Deterministic baseline: 0' SLR,NA,0,0,NA,0.2,no data,no data,no data
+Contra Costa,"Deterministic: 2030, 0.5' SLR",NA,1177,952,81%,2.2,55.5 million,"187,873","108,909"
+Sacramento,"Deterministic: 2030, 0.5' SLR",NA,0,0,0,2.6,"33,000","6,852",0
+San Joaquin,"Deterministic: 2030, 0.5' SLR",NA,9012,2945,33%,72,233.6 million,1.7 million,"137,934"
+Solano,"Deterministic: 2030, 0.5' SLR",NA,92,0,0,87.7,9.3 million,"348,161","18,303"
+Yolo,"Deterministic: 2030, 0.5' SLR",NA,0,0,NA,0.2,0,157,0
+Contra Costa,"Deterministic: 2050, 1' SLR",NA,2955,1414,48%,21.7,298 million,"294,043","181,189"
+Sacramento,"Deterministic: 2050, 1' SLR",NA,1389,1389,100%,41.9,87.2 million,"667,565","90,629"
+San Joaquin,"Deterministic: 2050, 1' SLR",NA,61254,40007,65%,236.2,3.4 billion,5.74 million,1.5 million
+Solano,"Deterministic: 2050, 1' SLR",NA,153,0,0,92.5,9.7 million,"365,279","23,109"
+Yolo,"Deterministic: 2050, 1' SLR",NA,0,0,NA,0.2,0,157,0
+Contra Costa,"Deterministic: 2050, 2' SLR",NA,10095,3644,36%,52.7,1.03 billion,1.36 million,"513,546"
+Sacramento,"Deterministic: 2050, 2' SLR",NA,1562,1562,100%,58.1,95.9 million,"808,391","91,190"
+San Joaquin,"Deterministic: 2050, 2' SLR",NA,63416,42099,66%,317.4,3.5 billion,7.15 million,1.7 million
+Solano,"Deterministic: 2050, 2' SLR",NA,183,0,0,93.3,12 million,"369,140","23,116"
+Yolo,"Deterministic: 2050, 2' SLR",NA,0,0,NA,0.2,0,157,0
+Contra Costa,"Deterministic: 2050+, 3.5' SLR",NA,21398,5116,24%,69.7,2.75 billion,2.22 million,"888,835"
+Sacramento,"Deterministic: 2050+, 3.5' SLR",NA,1728,1692,98%,66.1,119 million,"835,368","98,990"
+San Joaquin,"Deterministic: 2050+, 3.5' SLR",NA,131853,66732,51%,388.3,7.3 billion,7.78 million,4.1 million
+Solano,"Deterministic: 2050+, 3.5' SLR",NA,917,0,0,124.2,19.6 million,"696,689","24,108"
+Yolo,"Deterministic: 2050+, 3.5' SLR",NA,0,0,NA,0.2,0,157,0
 Contra Costa,Probabilistic: Existing conditions,200,460,282,61%,0.8,no data,no data,no data
 Sacramento,Probabilistic: Existing conditions,200,0,0,NA,2.6,no data,no data,no data
 San Joaquin,Probabilistic: Existing conditions,200,11023,3924,36%,97.5,no data,no data,no data

@@ -6,6 +6,7 @@ library(leaflet)
 library(shinyjs)
 library(leaflet.extras2)
 library(slickR)
+library(DT)
 
 
 # Load and wrangle all required components for app
@@ -188,7 +189,7 @@ function(input, output, session) {
       addPolygons(data=delta_sm, 
                   fill=F, 
                   stroke=T, 
-                  color="black", # polygon border color
+                  color="#273746", # polygon border color
                   weight=4, # polygon border weight
                   group = "Delta + Suisun Marsh Boundary"
                   ) %>% 
@@ -204,7 +205,15 @@ function(input, output, session) {
                   group = "Social vulnerability by block group"
                   ) %>%
                 
-    
+    ## County boundaries
+      addPolygons(data=counties, 
+                  fillColor = "transparent", 
+                  stroke=T, 
+                  color="black", # polygon border color
+                  weight=4, # polygon border weight
+                  label=paste(counties$NAME_UCASE),
+                  group = "County Boundaries") %>% 
+      
     ## Not-modeled polygons
     addPolygons(data=not_modeled, 
                 fillColor="#969696",
@@ -359,16 +368,7 @@ function(input, output, session) {
                    label = water_conveyance$Type
       ) %>% 
     
-    ## County boundaries 
-    #           addPolygons(data=delta_counties, 
-    #                       fillColor = "transparent", 
-    #                       stroke=T, 
-    #                       color="yellow", # polygon border color
-    #                       weight=3, # polygon border weight
-    #                       label=paste(delta_counties@data$NAME_UCASE),
-    #                       group = "County Boundaries") %>% 
-    
-  
+
       # add layer control panel 
     addLayersControl(
       overlayGroups = c(
@@ -385,6 +385,7 @@ function(input, output, session) {
         waste_group,
         water_group,
         "Flood exposure risk regions",
+        "County Boundaries",
         "Social vulnerability by block group",
         "Location Pin"
                         ),
@@ -405,7 +406,8 @@ function(input, output, session) {
         hideGroup(trans_line_group) %>% 
         hideGroup(waste_group) %>% 
         hideGroup(water_group) %>% 
-        hideGroup("Social vulnerability by block group")
+        hideGroup("Social vulnerability by block group") %>% 
+        hideGroup("County Boundaries")
     
 
     
@@ -579,15 +581,6 @@ function(input, output, session) {
         ) %>%
 
         
-        
-             ## County boundaries 
- #           addPolygons(data=delta_counties, 
- #                       fillColor = "transparent", 
- #                       stroke=T, 
- #                       color="yellow", # polygon border color
- #                       weight=3, # polygon border weight
- #                       label=paste(delta_counties@data$NAME_UCASE),
- #                       group = "County Boundaries") %>% 
             
             # add layer control panel 
             addLayersControl(
@@ -609,7 +602,34 @@ function(input, output, session) {
         
     }) # end observer
     
-    ### Data explorer tab details would go here
+    ### Data download tab
+    
+    county_data <- read_csv("3_ShinyData/county_scenario_data.csv") %>%
+      select(-Probability, -"Vulnerable Pop.") %>% 
+      mutate("Probability of flooding"="100 year/1% annual chance") %>% 
+      rename("Population within Delta exposed to flooding"="Population") %>% 
+#      rename("Total pop. in socially vulnerable areas" = "Vulnerable Pop.") %>% 
+      rename("% of exposed pop. in socially vulnerable areas" = "Pop. in socially vulnerable area") %>% 
+      rename("Flood exposure area within Delta (sq. miles)" = "Area (sq miles)") %>% 
+      rename("Structural assets exposed ($) - agricultural, residential and commercial properties" = "Structural assets ($)*") %>% 
+      rename("Infrastructure assets exposed ($) - critical facilities, water and energy utilities, comm/transportation infrastructure" = "Infrastructure assets ($)**")  %>% 
+      rename("Annual economic activity at risk ($) - agriculture and commercial" = "Annual economic activity ($)***")  
+    
+
+    output$county_table <- DT::renderDataTable({
+     county_data }, 
+                    extensions = 'Buttons',
+                    options = list(paging=FALSE,
+                                   searching=TRUE,
+                                   "dom" = 'T<"clear">lBfrtip',
+                                   buttons=list('copy', 'csv', 'excel', 'pdf', 'print')
+                                   ),
+                    class="display"
+                    )
+      
+    
+    
+    
     
 }
 

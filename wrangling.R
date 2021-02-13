@@ -28,12 +28,20 @@ tab_data <- read_csv("3_ShinyData/county_scenario_data.csv")
 
 tab_data$Population <- format(round(as.numeric(tab_data$Population), 0), nsmall=0, big.mark=",")  
 
-#tab_data$'Vulnerable Pop.' <- format(round(as.numeric(tab_data$'Vulnerable Pop.'), 0), nsmall=0, big.mark=",")
 
 
 ##### Import polygons
-# Note: these polygons were last updated 19 Nov 2020 and were copied in Jan '21 from G:ArcGIS\Projects\CCVA_Flood\DeltaAdapts_Mapping_KG\DeltaAdapts_FloodMap_InputData\201120_FloodMap_Inputs\Deterministic111920
 
+
+# County shapefiles
+
+counties <- read_sf("3_ShinyData/LDSMcounties.shp") %>% 
+  st_transform(4326) #reproject to lat/long
+
+
+
+#### Import deterministic and probabilistic Deta Adapts polygons
+## Note: these polygons were last updated 19 Nov 2020 and were copied in Jan '21 from G:ArcGIS\Projects\CCVA_Flood\DeltaAdapts_Mapping_KG\DeltaAdapts_FloodMap_InputData\201120_FloodMap_Inputs\Deterministic111920
 
 
 # Import individual deterministic polygons

@@ -7,7 +7,7 @@ library(shinyWidgets)
 library(leaflet)
 library(shinydashboard)
 library(slickR)
-
+library(DT)
 
 
 # Delta Adapts scenario choices for dropdown:
@@ -54,7 +54,7 @@ navbarPage(
            box(title="Welcome!",
                status="primary",
                solidHeader=TRUE,
-               width = 5,
+               width = 6,
                  
            tags$div(
              "This tool visualizes the",
@@ -76,7 +76,9 @@ navbarPage(
              tags$li(icon("table"),
               "Generate a table of data for people, land, and assets in the Delta at risk of",
               tags$b("flood exposure"),
-              "by county"),
+              "by county, and download data in the",
+              tags$b("Data Export"),
+              "tab"),
              tags$br(),
 
              tags$li(icon("building"),
@@ -101,7 +103,27 @@ navbarPage(
               "tab")
              ), # end ul list
              tags$br(),
-             tags$br()
+             tags$em("Want to learn more about how flooded regions were determined? Head to the",
+             tags$b('More Info + Methods'),
+             "tab."),
+             tags$br(),
+             tags$br(),
+             
+             h3("Key Terms:"),
+             tags$ul(
+               tags$li(tags$b("Deterministic"), "maps use a specific amount of sea level rise (SLR) (e.g. 0, 0.5’, 1’, 2’, and 3.5’) and a range of Delta water inflow possibilities (hydrology).  The maps display areas that would be exposed to flooding during a 100-year event, or an event that has a chance of occurrence of 1% in each year."),
+               tags$br(),
+               tags$li(tags$b("Probabilistic"), "maps use a range of sea level rise amounts based on projections at each time-period and a range of Delta water inflow possibilities (hydrology). The maps display areas according to their likelihood of flooding. This acknowledges that all areas have some risk of flood exposure."),
+               tags$br(),
+               tags$li(tags$b("Flood fighting"), "is a standard practice in many areas of the Delta during high water events, where flooding can be prevented when water levels exceed the top of levee by 6“ or less. Light blue regions of deterministic maps indicate areas where flooding could be avoided by implementing flood fighting activities."),
+               tags$br(),
+               tags$li(tags$b("Flood exposure"), "indicates areas that would be flooded according to our simulations. However, exposure does not indicate the degree to which a region and the assets within it will experience damage or loss, as it does not consider flood severity or site-specific conditions (e.g., flood-proofed buildings) that may prevent or limit or worsen impacts."),
+               tags$br(),
+               tags$li(tags$b("Assets and resources"), "include identified historic places, recreational areas, infrastructure (e.g. power plants and highways), and critical facilities (e.g. hospitals and schools)"),
+               tags$br(),
+               tags$li(tags$b("Socially vulnerable populations"), "experience heightened risk and increased sensitivity to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts. These disproportionate effects are caused by factors such as race, class, sexual orientation and identification, national origin, and income inequality.", tags$a("Explore social vulnerability indicators and learn about how the index is calculated.", href="https://deltascience.shinyapps.io/Delta_vulnerability_map/", target="_blank"))
+             )
+             
            ), # end div
              
 
@@ -109,43 +131,49 @@ navbarPage(
            
            box(status="primary",
                ssolidHeader = TRUE,
-               width = 7,
+               width = 6,
                slickROutput("slickr"),
                tags$br(),
                tags$br()
-               ), # end photo slideshow box
+               ) # end photo slideshow box
            
-           box(title="Key Terms:",
-               width = 6,
-                            tags$div(
-                              tags$ul(
-                                tags$li(tags$b("Deterministic"), "maps use a specific amount of sea level rise (SLR) (e.g. 0, 0.5’, 1’, 2’, and 3.5’) and a range of Delta water inflow possibilities (hydrology).  The maps display areas that would be exposed to flooding during a 100-year event, or an event that has a chance of occurrence of 1% in each year."),
-                                tags$br(),
-                                tags$li(tags$b("Probabilistic"), "maps use a range of sea level rise amounts based on projections at each time-period and a range of Delta water inflow possibilities (hydrology). The maps display areas according to their likelihood of flooding. This acknowledges that all areas have some risk of flood exposure."),
-                                tags$br(),
-                                tags$li(tags$b("Flood fighting"), "is a standard practice in many areas of the Delta during high water events, where flooding can be prevented when water levels exceed the top of levee by 6“ or less. Light blue regions of deterministic maps indicate areas where flooding could be avoided by implementing flood fighting activities."),
-                              ) # end tags$ul
-              
-                            ) # end div
-           ), # end box 3
+           # box(title="Key Terms:",
+           #     width = 6,
+           #                  tags$div(
+           #                    tags$ul(
+           #                      tags$li(tags$b("Deterministic"), "maps use a specific amount of sea level rise (SLR) (e.g. 0, 0.5’, 1’, 2’, and 3.5’) and a range of Delta water inflow possibilities (hydrology).  The maps display areas that would be exposed to flooding during a 100-year event, or an event that has a chance of occurrence of 1% in each year."),
+           #                      tags$br(),
+           #                      tags$li(tags$b("Probabilistic"), "maps use a range of sea level rise amounts based on projections at each time-period and a range of Delta water inflow possibilities (hydrology). The maps display areas according to their likelihood of flooding. This acknowledges that all areas have some risk of flood exposure."),
+           #                      tags$br(),
+           #                      tags$li(tags$b("Flood fighting"), "is a standard practice in many areas of the Delta during high water events, where flooding can be prevented when water levels exceed the top of levee by 6“ or less. Light blue regions of deterministic maps indicate areas where flooding could be avoided by implementing flood fighting activities."),
+           #                      tags$br(),
+           #                      tags$li(tags$b("Flood exposure"), "indicates areas that would be flooded according to our simulations. However, exposure does not indicate the degree to which a region and the assets within it will experience damage or loss, as it does not consider flood severity or site-specific conditions (e.g., flood-proofed buildings) that may prevent or limit or worsen impacts."),
+           #                      tags$br(),
+           #                      tags$li(tags$b("Assets and resources"), "include identified historic places, recreational areas, infrastructure (e.g. power plants and highways), and critical facilities (e.g. hospitals and schools)"),
+           #                      tags$br(),
+           #                      tags$li(tags$b("Socially vulnerable populations"), "experience heightened risk and increased sensitivity to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts. These disproportionate effects are caused by factors such as race, class, sexual orientation and identification, national origin, and income inequality.", tags$a("Explore social vulnerability indicators and learn about how the index is calculated.", href="https://deltascience.shinyapps.io/Delta_vulnerability_map/", target="_blank"))
+           #                    ) # end tags$ul
+           #    
+           #                  ) # end div
+           # ) # end box 3
+           # 
            
-           
-           box(title=" ",
-               width = 6,
-               tags$div(
-                 tags$ul(
-                   tags$br(),
-                   tags$br(),
-                   tags$li(tags$b("Flood exposure"), "indicates areas that would be flooded according to our simulations. However, exposure does not indicate the degree to which a region and the assets within it will experience damage or loss, as it does not consider flood severity or site-specific conditions (e.g., flood-proofed buildings) that may prevent or limit or worsen impacts."),
-                   tags$br(),
-                   tags$li(tags$b("Assets and resources"), "include identified historic places, recreational areas, infrastructure (e.g. power plants and highways), and critical facilities (e.g. hospitals and schools)"),
-                   tags$br(),
-                   tags$li(tags$b("Socially vulnerable populations"), "experience heightened risk and increased sensitivity to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts. These disproportionate effects are caused by factors such as race, class, sexual orientation and identification, national origin, and income inequality.", tags$a("Explore social vulnerability indicators and learn about how the index is calculated.", href="https://deltascience.shinyapps.io/Delta_vulnerability_map/", target="_blank"))
-                 ) # end tags$ul
-                 
-               ) # end div
-           ) # end box 4
-           
+           # box(title=" ",
+           #     width = 6,
+           #     tags$div(
+           #       tags$ul(
+           #         tags$br(),
+           #         tags$br(),
+           #         tags$li(tags$b("Flood exposure"), "indicates areas that would be flooded according to our simulations. However, exposure does not indicate the degree to which a region and the assets within it will experience damage or loss, as it does not consider flood severity or site-specific conditions (e.g., flood-proofed buildings) that may prevent or limit or worsen impacts."),
+           #         tags$br(),
+           #         tags$li(tags$b("Assets and resources"), "include identified historic places, recreational areas, infrastructure (e.g. power plants and highways), and critical facilities (e.g. hospitals and schools)"),
+           #         tags$br(),
+           #         tags$li(tags$b("Socially vulnerable populations"), "experience heightened risk and increased sensitivity to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts. These disproportionate effects are caused by factors such as race, class, sexual orientation and identification, national origin, and income inequality.", tags$a("Explore social vulnerability indicators and learn about how the index is calculated.", href="https://deltascience.shinyapps.io/Delta_vulnerability_map/", target="_blank"))
+           #       ) # end tags$ul
+           #       
+           #     ) # end div
+           # ) # end box 4
+           # 
            
   ), # end instructions tab
   
@@ -237,8 +265,6 @@ navbarPage(
                                       
                                       tableOutput('table'),
                                       
-                                      tags$br(),
-                                      
                                       tags$em("*Includes agricultural, residential, and commercial properties."),
                                       
                                       tags$br(),
@@ -248,6 +274,7 @@ navbarPage(
                                       tags$br(),
                                       tags$em("***Includes agricultural and commercial activities."),
                                       
+                                      tags$br(),
                                       tags$br(),
 
                                       tags$b("Values for probabilistic scenarios reflect 200-year exposure risk (medium probability).")
@@ -325,8 +352,12 @@ navbarPage(
                     tags$div(id="cite",
                              tags$em('This map was created in support of the Delta Adapts initiative, a project of the Delta Stewardship Council (2020)')
                     )
-           ),
+           ), # end hydrology explorer tab panel
            
+  
+  tabPanel("Data Export",
+           DT::dataTableOutput("county_table")
+  ),
 
           
            tabPanel('More Info + Methods',
@@ -431,9 +462,9 @@ navbarPage(
                              target="_blank"),
                       tags$br(),
                       tags$br(),
-                        "Please contact ",
-                        tags$a("Cory Copeland", href="mailto:cory.copeland@deltacouncil.ca.gov"),
-                        " at the Delta Stewardship Council Planning and Performance Division with any questions."
+                        "Please contact the ",
+                        tags$a("Delta Adapts team", href="mailto:climatechange@deltacouncil.ca.gov"),
+                        " at the Delta Stewardship Council with any questions."
                     ),
                     
                     tags$br(),

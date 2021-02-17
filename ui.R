@@ -136,44 +136,7 @@ navbarPage(
                tags$br(),
                tags$br()
                ) # end photo slideshow box
-           
-           # box(title="Key Terms:",
-           #     width = 6,
-           #                  tags$div(
-           #                    tags$ul(
-           #                      tags$li(tags$b("Deterministic"), "maps use a specific amount of sea level rise (SLR) (e.g. 0, 0.5’, 1’, 2’, and 3.5’) and a range of Delta water inflow possibilities (hydrology).  The maps display areas that would be exposed to flooding during a 100-year event, or an event that has a chance of occurrence of 1% in each year."),
-           #                      tags$br(),
-           #                      tags$li(tags$b("Probabilistic"), "maps use a range of sea level rise amounts based on projections at each time-period and a range of Delta water inflow possibilities (hydrology). The maps display areas according to their likelihood of flooding. This acknowledges that all areas have some risk of flood exposure."),
-           #                      tags$br(),
-           #                      tags$li(tags$b("Flood fighting"), "is a standard practice in many areas of the Delta during high water events, where flooding can be prevented when water levels exceed the top of levee by 6“ or less. Light blue regions of deterministic maps indicate areas where flooding could be avoided by implementing flood fighting activities."),
-           #                      tags$br(),
-           #                      tags$li(tags$b("Flood exposure"), "indicates areas that would be flooded according to our simulations. However, exposure does not indicate the degree to which a region and the assets within it will experience damage or loss, as it does not consider flood severity or site-specific conditions (e.g., flood-proofed buildings) that may prevent or limit or worsen impacts."),
-           #                      tags$br(),
-           #                      tags$li(tags$b("Assets and resources"), "include identified historic places, recreational areas, infrastructure (e.g. power plants and highways), and critical facilities (e.g. hospitals and schools)"),
-           #                      tags$br(),
-           #                      tags$li(tags$b("Socially vulnerable populations"), "experience heightened risk and increased sensitivity to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts. These disproportionate effects are caused by factors such as race, class, sexual orientation and identification, national origin, and income inequality.", tags$a("Explore social vulnerability indicators and learn about how the index is calculated.", href="https://deltascience.shinyapps.io/Delta_vulnerability_map/", target="_blank"))
-           #                    ) # end tags$ul
-           #    
-           #                  ) # end div
-           # ) # end box 3
-           # 
-           
-           # box(title=" ",
-           #     width = 6,
-           #     tags$div(
-           #       tags$ul(
-           #         tags$br(),
-           #         tags$br(),
-           #         tags$li(tags$b("Flood exposure"), "indicates areas that would be flooded according to our simulations. However, exposure does not indicate the degree to which a region and the assets within it will experience damage or loss, as it does not consider flood severity or site-specific conditions (e.g., flood-proofed buildings) that may prevent or limit or worsen impacts."),
-           #         tags$br(),
-           #         tags$li(tags$b("Assets and resources"), "include identified historic places, recreational areas, infrastructure (e.g. power plants and highways), and critical facilities (e.g. hospitals and schools)"),
-           #         tags$br(),
-           #         tags$li(tags$b("Socially vulnerable populations"), "experience heightened risk and increased sensitivity to climate change and have less capacity and fewer resources to cope with, adapt to, or recover from climate impacts. These disproportionate effects are caused by factors such as race, class, sexual orientation and identification, national origin, and income inequality.", tags$a("Explore social vulnerability indicators and learn about how the index is calculated.", href="https://deltascience.shinyapps.io/Delta_vulnerability_map/", target="_blank"))
-           #       ) # end tags$ul
-           #       
-           #     ) # end div
-           # ) # end box 4
-           # 
+         
            
   ), # end instructions tab
   
@@ -216,7 +179,7 @@ navbarPage(
                                      tags$br(),
                                      tags$br(),
                                     
-                                     h4(tags$b("2. Toggle asset, vulnerability and flood layers in control box >>")),
+                                     h4(tags$b("2. Toggle asset, vulnerability and flood layers in control box (upper right) "), icon("layer-group")),
                                      
                                      tags$br(),
 
@@ -331,7 +294,7 @@ navbarPage(
                                       radioButtons(inputId="hydro", 
                                                    label=h4("1. Select watershed hydrology:"), 
                                                    choices=c("Historical", "2050", "2085"),
-                                                   selected="Historical"
+                                                   selected="Historical",
                                                    ),
                                       
                                       sliderTextInput(inputId="SLR",
@@ -364,27 +327,60 @@ navbarPage(
                     tags$head(
                       includeCSS("styles.css")
                     ),
+                    
+                    h3("Learn more + contact us"),
+                    
+                    tags$ul(
+                      tags$li("Visit the",
+                              tags$a("Delta Adapts website",
+                                     href="https://deltacouncil.ca.gov/delta-plan/climate-change",
+                                     target="_blank"),
+                              "to learn more about the initiative."),
+                      tags$li("Read more about the flood exposure data, flood hazard scenarios, and flood hazard mapping processes in the",
+                              tags$a("Flood Hazard Assessment Technical Memorandum.", 
+                                     href="https://deltacouncil.ca.gov/pdf/delta-plan/2021-01-15-delta-adapts-flood-hazard-assessment.pdf", 
+                                     target="_blank")),
+                      tags$li( "Read more about Delta assets and economic impact and exposure analysis in the",
+                               tags$a("Economics Technical Memorandum.",
+                                      href="https://deltacouncil.ca.gov/pdf/delta-plan/2021-01-15-delta-adapts-economic-assessment.pdf",
+                                      target="_blank")),
+                      tags$li("Check out the app code on",
+                              tags$a("Github.",
+                                     href="https://github.com/molly-williams/deltaSLR_map",
+                                     target="_blank")),
+                      tags$li("Contact the Delta Adapts team at",
+                              tags$a("climatechange@deltacouncil.ca.gov", href="mailto:climatechange@deltacouncil.ca.gov"),
+                              " at the Delta Stewardship Council with any questions.")
+                    ), # end bullets 
+                    
+                 
+                    
                     h3("Project Background"),
                     tags$div(
-                        "This tool was developed as part of",
+                        "The maps generated on this app are a product of",
                         tags$a("Delta Adapts: Creating a Climate Resilient Future,", href="https://deltacouncil.ca.gov/delta-plan/climate-change", target="_blank"),
                         "an initiative of the Delta Stewardship Council. The first of its kind, the project assesses vulnerability of the Delta’s 
                         people, places, ecosystems, infrastructure, assets and resources to varied effects from future climate conditions. The draft 
-                        vulnerability assessment was released in early 2021 and can be accessed at the link above.",
+                        vulnerability assessment was released in early 2021 and can be accessed",
+                        tags$a("here.",
+                               href="https://deltacouncil.ca.gov/pdf/delta-plan/2021-01-15-delta-adapts-public-draft-vulnerability-assessment.pdf",
+                               target="_blank"),
                         
                         tags$br(),
                         tags$br(),
                         
-                        "Delta water levels are influenced by tides, weather, and streamflow from rivers and tributaries. Climate change is expected to increase both 
-                        average sea level and seasonal extreme sea levels in San Francisco Bay, which will in turn change water levels in the Delta. Further, climate 
-                        change will alter oceanic and coastal processes that influence the Bay and Delta, and change the timing and volume of water flowing from rivers into the Delta.",
-                        
+                        "Delta water levels are influenced by tides, weather, and streamflow from rivers and tributaries. Climate change is expected to increase both
+                        average sea level and the timing and amount of water flowing into the Delta from rivers and tributaries. These changes will combine to increase water levels throughout the Delta.",
+
                         tags$br(),
                         tags$br(),
                         
-                        "The Delta is a complex system and climate change will not affect all areas in the same ways. These maps serve as tools to visualize the flood exposure risk of regions 
-                        within the Delta based on hydrology and sea level rise, which are two but not all of the factors influencing flood exposure risk."
-                    ), # end div
+                        "The Delta is a complex system and climate change will not affect all areas in the same ways. These maps serve as tools to visualize the flood
+                        exposure risk of regions within the Delta based on hydrology and sea level rise.  These maps also include other factors which influence water 
+                        levels including daily tides and storm surge."
+
+                        
+                           ), # end div
                     
 
                     tags$br(),
@@ -414,7 +410,7 @@ navbarPage(
                     
                     h3("Mapping Approach"),
                     tags$div(
-                        "Delta Adapts evaluates likelihood of flood hazards from projections of sea level rise and changes in watershed hydrology. This analysis provide information about the likelihood of a flood event 
+                        "Delta Adapts evaluates likelihood of flood hazards from projections of sea level rise and changes in watershed hydrology. This analysis provides information about the likelihood of a flood event 
                         occurring that would overtop levees at each location throughout the Delta simulated from two million iterations.",
                       
                       tags$br(),
@@ -426,9 +422,9 @@ navbarPage(
                     
                       tags$ul(
                         tags$li(tags$b("Less than a 10-year event (very high likelihood):"), "an event that has a 10 percent chance of occurrence in each year and would have a 65 percent chance of occurring at least once over a 10-year period. This level of flood frequency would be acceptable only for wetland, riparian, or subtidal open water habitat."),
-                        tags$li(tags$b("Between a 10-year and 50-year event (high likelihood):"), "an event that has between a 2 and 10 percent change of occurrence in each year and would have an 18 to 65 percent chance of occurring at least once over a 10-year period. This level of flood frequency would likely be too high to support agricultural investment and too low to support wetland development."),
-                        tags$li(tags$b("Between a 50-year and 100-year event (medium likelihood):"), "an event that has between a 1 and 2 percent change of occurrence in each year and would have a 10 to 18 percent chance of occurring at least once over a 10-year period. This level of flood frequency is likely acceptable for agricultural investment of non-permanent crops. "),
-                        tags$li(tags$b("Between a 100-year and 200-year event (low likelihood):"), "an event that has between a 0.5 and 1 percent change of occurrence in each year and would have a 5 to 10 percent chance of occurring at least once over a 10-year period. This level of flood frequency is likely acceptable for existing rural population protection and investment in permanent crops. ")
+                        tags$li(tags$b("Between a 10-year and 50-year event (high likelihood):"), "an event that has between a 2 and 10 percent chance of occurrence in each year and would have an 18 to 65 percent chance of occurring at least once over a 10-year period. This level of flood frequency would likely be too high to support agricultural investment and too low to support wetland development."),
+                        tags$li(tags$b("Between a 50-year and 100-year event (medium likelihood):"), "an event that has between a 1 and 2 percent chance of occurrence in each year and would have a 10 to 18 percent chance of occurring at least once over a 10-year period. This level of flood frequency is likely acceptable for agricultural investment of non-permanent crops. "),
+                        tags$li(tags$b("Between a 100-year and 200-year event (low likelihood):"), "an event that has between a 0.5 and 1 percent chance of occurrence in each year and would have a 5 to 10 percent chance of occurring at least once over a 10-year period. This level of flood frequency is likely acceptable for existing rural population protection and investment in permanent crops. ")
                       ), # end bullets
                       
                       tags$br(),
@@ -450,27 +446,62 @@ navbarPage(
                     
                     tags$br(),
                     
-                   
-                  
-                    tags$br(),
+                    h3("Mapping Scenarios"),
                     
-                    h3("Read more + contact us!"),
+                    h4("Deterministic"),
                     tags$div(
-                      "Additional information about the data, flood hazard scenarios, and flood hazard mapping processes can be found in the",
-                      tags$a("Flood Hazard Assessment Technical Memorandum.", 
-                             href="https://deltacouncil.ca.gov/pdf/delta-plan/2021-01-15-delta-adapts-flood-hazard-assessment.pdf", 
-                             target="_blank"),
+                      "Deterministic scenarios use specific sea level rise amounts and identify regions that would be flooded at the 100-year/1% annual chance water level. Water levels for the deterministic scenarios were estimated using Monte Carlo simulations with 300,000 iterations.",
                       tags$br(),
                       tags$br(),
-                        "Please contact the ",
-                        tags$a("Delta Adapts team", href="mailto:climatechange@deltacouncil.ca.gov"),
-                        " at the Delta Stewardship Council with any questions."
-                    ),
+                      
+                      "In addition to sea level rise amount, the deterministic scenarios require selection of an expected watershed hydrology that will be representative of conditions at a specific planning horizon. The existing and 2030 scenarios use historical watershed hydrology, while 
+                      2050 scenarios are based on expected conditions at mid-century (2035-2064) under RCP 8.5 (a climate scenario that is representative of the current emissions trajectory). A single post-2050 planning horizon (2050+) was selected to illustrate the nature of flood hazards 
+                      that may occur at end-of-century (2070-2099) under RCP 8.5, as substantial flooding beyond 2050 may alter hydrodynamics in a way that cannot be captured by the model.",
+                      tags$br(),
+                      tags$br(),
+                      
+                      "Selection of sea level rise amounts to incorporate into the models were informed by the Ocean Protection Council’s",
+                      tags$a("2018 Sea Level Rise Guidance document:",
+                             href="https://opc.ca.gov/webmaster/ftp/pdf/agenda_items/20180314/Item3_Exhibit-A_OPC_SLR_Guidance-rd3.pdf",
+                             target="_blank"
+                             ),
+                      
+                      tags$ul(
+                        tags$li("6 inches is nearly equal to the median projection for 2030 and was selected to be representative of plausible 2030 conditions"),
+                        tags$li("12 inches is roughly equal to the median projection for 2050 and was selected to be representative of plausible 2050 conditions (or extreme 2030 conditions) "),
+                        tags$li("24 inches is nearly equal to the upper range projection for 2050 and was selected to be representative of extreme 2050 conditions (or plausible 2070 conditions) "),
+                        tags$li("42 inches may occur before 2100 and could occur as early as 2070 and was selected to be representative of post-2050 conditions. In addition, 3.5 feet (42 inches) is recommended for planning by the state’s recently adopted",
+                          tags$a("Principles for Aligned State Action",
+                                 href="https://documents.coastal.ca.gov/reports/2020/5/w6g/w6g-5-2020-exhibits.pdf",
+                                 target="_blank"),
+                          "and Ocean Protection Council’s",
+                        tags$a("2020 Strategic Plan.",
+                               href="http://www.opc.ca.gov/webmaster/ftp/pdf/agenda_items/20200226/OPC-2020-2025-Strategic-Plan-FINAL-20200228.pdf",
+                               target="_blank")
+                        ),
+                      ), # end bullets
+                      
+
+                      ), # end div
+                    
+                    h4("Probabilistic"),
+                    tags$div(
+                      "Probabilistic scenarios combine potential conditions across a range of possible climate outcomes, providing planners and managers with information that more readily fits 
+                      into a risk-based decision-making framework. The probabilistic scenarios show regions with a low, medium, high, or very high probability of occurrence at each planning horizon,
+                      as described above. Each is associated with a range of inflow and sea level rise scenarios based on probability thresholds and the adjacent levee crest elevation.",
+                      tags$br(),
+                      tags$br(),
+                      
+                      "Water levels for the probabilistic scenarios were estimated using Monte Carlo simulations with 2,000,000 iterations. So many iterations are required for the probabilistic scenarios 
+                      due to the addition of a probability distribution for sea level rise at each planning horizon as opposed to a constant sea level rise value. As a result, many more iterations are required 
+                      to examine the full range of potential sea level rise and inflow conditions."
+                      ),
                     
                     tags$br(),
                     tags$br()
                     
-           ),
+                    
+           ), # end methods tab
            
            conditionalPanel("false", icon("crosshair"))
 ) # end navbarpage

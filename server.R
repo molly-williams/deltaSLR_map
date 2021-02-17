@@ -169,8 +169,11 @@ function(input, output, session) {
     
     
     leafletProxy("map2") %>%
+      clearControls() %>% 
       clearShapes() %>% 
-      
+
+     
+    
       # add location markers
       addMarkers(data = points(), group="Location Pin") %>% 
       
@@ -194,16 +197,7 @@ function(input, output, session) {
                   group = "Delta + Suisun Marsh Boundary"
                   ) %>% 
       
-      ## Social vulnerability data
-      addPolygons(data=sovi,
-                  fillColor=sovi_pal(s_colorData),
-                  fillOpacity = 0.4,
-                  stroke=T,
-                  color="black", # polygon border color
-                  weight=0.8, # polygon border weight
-                  label=sovi$Rating,
-                  group = "Social vulnerability by block group"
-                  ) %>%
+
                 
     ## County boundaries
       addPolygons(data=counties, 
@@ -224,34 +218,19 @@ function(input, output, session) {
                 popup=paste("Not Modeled"),
                 group = "Regions Not Modeled"
                 ) %>% 
-    
-      
-      # Add legends  
-      addLegend("bottomright", 
-                pal=nm_pal, 
-                values=not_modeled$Modeled, 
-                layerId="colorLegend1", # layerid prevents legend from duplicating whenever you redraw the map with a new selection
-                opacity = 0.7,
-                labFormat = labelFormat(prefix = "", 
-                                        suffix = "", 
-                                        between = " - ", 
-                                        digits = 0)
-      ) %>% 
 
-    
-    # Flooding legend
-    addLegend("bottomright",
-              pal=pal, 
-              values=colorData, 
-              title="Flood Exposure Risk",
-              layerId="colorLegend2", 
-              opacity = 0.8,
-              group = "Flood exposure risk regions",
-              labFormat = labelFormat(prefix = "", 
-                                              suffix = "", 
-                                              between = " - ", 
-                                              digits = 0)
-          ) %>% 
+      
+      ## Social vulnerability data
+      addPolygons(data=sovi,
+                  fillColor=sovi_pal(s_colorData),
+                  fillOpacity = 0.4,
+                  stroke=T,
+                  color="black", # polygon border color
+                  weight=0.8, # polygon border weight
+                  label=sovi$Rating,
+                  group = "Social vulnerability by block group"
+      ) %>%
+      
       # Vulnerability legend - still reappearing when scenario is switched even if group is not selected?
       addLegend("bottomright",
                 pal=sovi_pal,
@@ -266,8 +245,36 @@ function(input, output, session) {
                                         digits = 0)
       ) %>%
       
-
-
+      clearControls() %>%  # prevent the social vulnerability legend from automatically appearing when you generate a new map
+    
+      # Add legends  
+      addLegend("bottomright", 
+                pal=nm_pal, 
+                values=not_modeled$Modeled, 
+                layerId="colorLegend1", # layerid prevents legend from duplicating whenever you redraw the map with a new selection
+                opacity = 0.7,
+                labFormat = labelFormat(prefix = "", 
+                                        suffix = "", 
+                                        between = " - ", 
+                                        digits = 0)
+      ) %>% 
+      
+      
+      
+      
+      # Flooding legend
+      addLegend("bottomright",
+                pal=pal, 
+                values=colorData, 
+                title="Flood Exposure Risk",
+                layerId="colorLegend2", 
+                opacity = 0.8,
+                group = "Flood exposure risk regions",
+                labFormat = labelFormat(prefix = "", 
+                                        suffix = "", 
+                                        between = " - ", 
+                                        digits = 0)
+      ) %>% 
 
       # Add polygon and point data for assets
 
@@ -368,50 +375,49 @@ function(input, output, session) {
                    label = water_conveyance$Type
       ) %>% 
     
-
       # add layer control panel 
-    addLayersControl(
-      overlayGroups = c(
-        ag_group,
-        comm_group,
-        critical_group, 
-        cultural_group,
-        energy_point_group,
-        energy_line_group,
-        rec_point_group, 
-        rec_line_group,
-        trans_point_group,
-        trans_line_group, 
-        waste_group,
-        water_group,
-        "Flood exposure risk regions",
-        "County Boundaries",
-        "Social vulnerability by block group",
-        "Location Pin"
-                        ),
-      
-      position = "topright",
-      
-      options = layersControlOptions(collapsed = FALSE)
+      addLayersControl(
+        overlayGroups = c(
+          ag_group,
+          comm_group,
+          critical_group, 
+          cultural_group,
+          energy_point_group,
+          energy_line_group,
+          rec_point_group, 
+          rec_line_group,
+          trans_point_group,
+          trans_line_group, 
+          waste_group,
+          water_group,
+          "Flood exposure risk regions",
+          "County Boundaries",
+          "Social vulnerability by block group",
+          "Location Pin"
+        ),
+        
+        position = "topright",
+        
+        options = layersControlOptions(collapsed = TRUE)
       )  %>%     
-        hideGroup(ag_group) %>% 
-        hideGroup(comm_group) %>% 
-        hideGroup(critical_group) %>% 
-        hideGroup(cultural_group) %>%
-        hideGroup(energy_point_group) %>% 
-        hideGroup(energy_line_group) %>% 
-        hideGroup(rec_point_group) %>% 
-        hideGroup(rec_line_group) %>% 
-        hideGroup(trans_point_group) %>% 
-        hideGroup(trans_line_group) %>% 
-        hideGroup(waste_group) %>% 
-        hideGroup(water_group) %>% 
-        hideGroup("Social vulnerability by block group") %>% 
-        hideGroup("County Boundaries")
-    
+      hideGroup(ag_group) %>% 
+      hideGroup(comm_group) %>% 
+      hideGroup(critical_group) %>% 
+      hideGroup(cultural_group) %>%
+      hideGroup(energy_point_group) %>% 
+      hideGroup(energy_line_group) %>% 
+      hideGroup(rec_point_group) %>% 
+      hideGroup(rec_line_group) %>% 
+      hideGroup(trans_point_group) %>% 
+      hideGroup(trans_line_group) %>% 
+      hideGroup(waste_group) %>% 
+      hideGroup(water_group) %>% 
+      hideGroup("Social vulnerability by block group") %>% 
+      hideGroup("County Boundaries")
+      
+      
 
-    
-    
+
   }) # end observer
  
   # Add print map functionality
@@ -464,7 +470,8 @@ function(input, output, session) {
     # Draw interactive polygons
     observe({
       
-
+      req(input$nav=="Hydrology Explorer") # map for selected parameters will appear automatically when user navigates to this tab
+      
           leafletProxy("map") %>%
             clearShapes() %>% 
       
@@ -482,7 +489,7 @@ function(input, output, session) {
               
                    
                    
-               ## Display label info on mouseover         
+               ## Display label info on mouseover and highlight polygon        
                 #,  highlight = highlightOptions(
                 #     weight = 2,
                 #     fillOpacity = 0,

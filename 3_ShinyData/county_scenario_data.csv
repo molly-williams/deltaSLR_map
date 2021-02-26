@@ -4,43 +4,44 @@ Sacramento,Deterministic baseline: 0' SLR,NA,0,0,NA,2.6,no data,no data,no data
 San Joaquin,Deterministic baseline: 0' SLR,NA,9012,2945,33%,72,no data,no data,no data
 Solano,Deterministic baseline: 0' SLR,NA,92,0,0,85.2,no data,no data,no data
 Yolo,Deterministic baseline: 0' SLR,NA,0,0,NA,0.2,no data,no data,no data
-Contra Costa,"Deterministic: 2030, 0.5' SLR",NA,1177,952,81%,2.2,55.5 million,"187,873","108,909"
-Sacramento,"Deterministic: 2030, 0.5' SLR",NA,0,0,0,2.6,"33,000","6,852",0
-San Joaquin,"Deterministic: 2030, 0.5' SLR",NA,9012,2945,33%,72,233.6 million,1.7 million,"137,934"
-Solano,"Deterministic: 2030, 0.5' SLR",NA,92,0,0,87.7,9.3 million,"348,161","18,303"
-Yolo,"Deterministic: 2030, 0.5' SLR",NA,0,0,NA,0.2,0,157,0
-Contra Costa,"Deterministic: 2050, 1' SLR",NA,2955,1414,48%,21.7,298 million,"294,043","181,189"
-Sacramento,"Deterministic: 2050, 1' SLR",NA,1389,1389,100%,41.9,87.2 million,"667,565","90,629"
-San Joaquin,"Deterministic: 2050, 1' SLR",NA,61254,40007,65%,236.2,3.4 billion,5.74 million,1.5 million
-Solano,"Deterministic: 2050, 1' SLR",NA,153,0,0,92.5,9.7 million,"365,279","23,109"
-Yolo,"Deterministic: 2050, 1' SLR",NA,0,0,NA,0.2,0,157,0
-Contra Costa,"Deterministic: 2050, 2' SLR",NA,10095,3644,36%,52.7,1.03 billion,1.36 million,"513,546"
-Sacramento,"Deterministic: 2050, 2' SLR",NA,1562,1562,100%,58.1,95.9 million,"808,391","91,190"
-San Joaquin,"Deterministic: 2050, 2' SLR",NA,63416,42099,66%,317.4,3.5 billion,7.15 million,1.7 million
-Solano,"Deterministic: 2050, 2' SLR",NA,183,0,0,93.3,12 million,"369,140","23,116"
-Yolo,"Deterministic: 2050, 2' SLR",NA,0,0,NA,0.2,0,157,0
-Contra Costa,"Deterministic: 2050+, 3.5' SLR",NA,21398,5116,24%,69.7,2.75 billion,2.22 million,"888,835"
-Sacramento,"Deterministic: 2050+, 3.5' SLR",NA,1728,1692,98%,66.1,119 million,"835,368","98,990"
-San Joaquin,"Deterministic: 2050+, 3.5' SLR",NA,131853,66732,51%,388.3,7.3 billion,7.78 million,4.1 million
-Solano,"Deterministic: 2050+, 3.5' SLR",NA,917,0,0,124.2,19.6 million,"696,689","24,108"
-Yolo,"Deterministic: 2050+, 3.5' SLR",NA,0,0,NA,0.2,0,157,0
-Contra Costa,Probabilistic: Existing conditions,200,460,282,61%,0.8,no data,no data,no data
-Sacramento,Probabilistic: Existing conditions,200,0,0,NA,2.6,no data,no data,no data
-San Joaquin,Probabilistic: Existing conditions,200,11023,3924,36%,97.5,no data,no data,no data
-Solano,Probabilistic: Existing conditions,200,92,0,0,86.5,no data,no data,no data
-Yolo,Probabilistic: Existing conditions,200,0,0,NA,0.2,no data,no data,no data
-Contra Costa,Probabilistic: 2030 conditions,200,1177,952,81%,2.2,18.1 million,124 million,46.6 million
-Sacramento,Probabilistic: 2030 conditions,200,0,0,NA,2.6,"33,000",6.8 million,0
-San Joaquin,Probabilistic: 2030 conditions,200,11035,3930,36%,97.8,234 million,1.7 billion,138 million
-Solano,Probabilistic: 2030 conditions,200,149,0,0,91.7,9.3 million,348 million,18.3 million
-Yolo,Probabilistic: 2030 conditions,200,0,0,NA,0.2,0,0,0
-Contra Costa,Probabilistic: 2050 conditions,200,4022,1607,40%,41.6,298 million,294 million,181 million
-Sacramento,Probabilistic: 2050 conditions,200,1555,1519,98%,49.5,87.2 million,666 million,90.6 million
-San Joaquin,Probabilistic: 2050 conditions,200,69637,43426,62%,307.5,3.4 billion,5.7 billion,1.5 billion
-Solano,Probabilistic: 2050 conditions,200,153,0,0,92.7,9.7 million,365 million,23 million
-Yolo,Probabilistic: 2050 conditions,200,0,0,NA,0.2,0,0,0
-Contra Costa,Probabilistic: 2085 conditions,200,22629,5524,24%,70.2,no data,no data,no data
-Sacramento,Probabilistic: 2085 conditions,200,55932,30721,55%,75.5,no data,no data,no data
-San Joaquin,Probabilistic: 2085 conditions,200,194743,98565,51%,401.9,no data,no data,no data
-Solano,Probabilistic: 2085 conditions,200,917,0,0,127,no data,no data,no data
-Yolo,Probabilistic: 2085 conditions,200,218,0,0,9.9,no data,no data,no data
+Contra Costa,"Deterministic: 2030, 0.5' SLR",NA,1177,952,81%,2.2,55.5 million,188 million,109 million
+Sacramento,"Deterministic: 2030, 0.5' SLR",NA,0,0,0,2.6,"33,000",7 million,0
+San Joaquin,"Deterministic: 2030, 0.5' SLR",NA,9012,2945,33%,72,233.6 million,1.7 billion,138 million
+Solano,"Deterministic: 2030, 0.5' SLR",NA,92,0,0,87.7,9.3 million,348 million,18 million
+Yolo,"Deterministic: 2030, 0.5' SLR",NA,0,0,NA,0.2,0,0,0
+Contra Costa,"Deterministic: 2050, 1' SLR",NA,2955,1414,48%,21.7,298 million,294 million,181 million
+Sacramento,"Deterministic: 2050, 1' SLR",NA,1389,1389,100%,41.9,87.2 million,668 million,90.6 million
+San Joaquin,"Deterministic: 2050, 1' SLR",NA,61254,40007,65%,236.2,3.4 billion,5.7 billion,1.5 billion
+Solano,"Deterministic: 2050, 1' SLR",NA,153,0,0,92.5,9.7 million,365 million,23 million
+Yolo,"Deterministic: 2050, 1' SLR",NA,0,0,NA,0.2,0,0,0
+Contra Costa,"Deterministic: 2050, 2' SLR",NA,10095,3644,36%,52.7,1.03 billion,1.36 billion,513.5 million
+Sacramento,"Deterministic: 2050, 2' SLR",NA,1562,1562,100%,58.1,95.9 million,808 million,91 million
+San Joaquin,"Deterministic: 2050, 2' SLR",NA,63416,42099,66%,317.4,3.5 billion,7.15 billion,1.7 billion
+Solano,"Deterministic: 2050, 2' SLR",NA,183,0,0,93.3,12 million,369 million,23 million
+Yolo,"Deterministic: 2050, 2' SLR",NA,0,0,NA,0.2,0,0,0
+Contra Costa,"Deterministic: 2050+, 3.5' SLR",NA,21398,5116,24%,69.7,2.75 billion,2.2 billion,889 million
+Sacramento,"Deterministic: 2050+, 3.5' SLR",NA,1728,1692,98%,66.1,119 million,835 million,99 million
+San Joaquin,"Deterministic: 2050+, 3.5' SLR",NA,131853,66732,51%,388.3,7.3 billion,7.78 billion,4.1 billion
+Solano,"Deterministic: 2050+, 3.5' SLR",NA,917,0,0,124.2,19.6 million,697 million,24 million
+Yolo,"Deterministic: 2050+, 3.5' SLR",NA,0,0,NA,0.2,0,0,0
+Contra Costa,Probabilistic: Existing conditions,100,460,282,61%,0.8,no data,no data,no data
+Sacramento,Probabilistic: Existing conditions,100,0,0,NA,2.6,no data,no data,no data
+San Joaquin,Probabilistic: Existing conditions,100,11023,3924,36%,97.5,no data,no data,no data
+Solano,Probabilistic: Existing conditions,100,92,0,0,86.5,no data,no data,no data
+Yolo,Probabilistic: Existing conditions,100,0,0,NA,0.2,no data,no data,no data
+Contra Costa,Probabilistic: 2030 conditions,100,1177,952,81%,2.2,18.1 million,124 million,46.6 million
+Sacramento,Probabilistic: 2030 conditions,100,0,0,NA,2.6,"33,000",7 million,0
+San Joaquin,Probabilistic: 2030 conditions,100,11035,3930,36%,97.8,234 million,1.7 billion,138 million
+Solano,Probabilistic: 2030 conditions,100,149,0,0,91.7,9.3 million,348 million,18.3 million
+Yolo,Probabilistic: 2030 conditions,100,0,0,NA,0.2,0,0,0
+Contra Costa,Probabilistic: 2050 conditions,100,4022,1607,40%,41.6,298 million,294 million,181 million
+Sacramento,Probabilistic: 2050 conditions,100,1555,1519,98%,49.5,87.2 million,667 million,90.6 million
+San Joaquin,Probabilistic: 2050 conditions,100,69637,43426,62%,307.5,3.4 billion,5.7 billion,1.5 billion
+Solano,Probabilistic: 2050 conditions,100,153,0,0,92.7,9.7 million,365 million,23 million
+Yolo,Probabilistic: 2050 conditions,100,0,0,NA,0.2,0,0,0
+Contra Costa,Probabilistic: 2085 conditions,100,22629,5524,24%,70.2,no data,no data,no data
+Sacramento,Probabilistic: 2085 conditions,100,55932,30721,55%,75.5,no data,no data,no data
+San Joaquin,Probabilistic: 2085 conditions,100,194743,98565,51%,401.9,no data,no data,no data
+Solano,Probabilistic: 2085 conditions,100,917,0,0,127,no data,no data,no data
+Yolo,Probabilistic: 2085 conditions,100,218,0,0,9.9,no data,no data,no data
+,,,,,,,,,

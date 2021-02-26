@@ -24,7 +24,7 @@ vars <- c("No scenario selected",
           "Probabilistic: 2085 conditions")
 
 
-# Load 
+# Load JS file for adding logo
 jsfile <- "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js" 
 
 
@@ -240,7 +240,7 @@ navbarPage(
                                       tags$br(),
                                       tags$br(),
 
-                                      tags$b("Values for probabilistic scenarios reflect 200-year exposure risk (medium probability).")
+                                      tags$b("Values for probabilistic scenarios reflect 100-year exposure risk (medium probability).")
 
                                       
                         ) # end 2nd absolute panel (data table)

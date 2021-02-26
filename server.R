@@ -90,7 +90,7 @@ function(input, output, session) {
   })
   
 
-  # Code for reactive color palettes 
+  # Code for reactive color palettes (determines what colors polygons will be)
   # Note: this could probably be condensed since all the deterministic have the same palette and all the probabilistic have the same palette
   observe({
     colorBy <- input$scenario
@@ -179,11 +179,11 @@ function(input, output, session) {
       
       ## Add flood polygons
        addPolygons(data=filteredData(),
-                   fillColor=pal(colorData),
-                   fillOpacity=0.8,
-                   stroke = T,
-                   color="black",
-                   weight=0.8,
+                   fillColor=pal(colorData), # color palette
+                   fillOpacity=0.8, # how see-through do you want the polygons to be
+                   stroke = T, # border (t/f)
+                   color="black", # border color
+                   weight=0.8, # border thickness 
                    group = "Flood exposure risk regions",
                    popup=det_prob_popup  
                    ) %>% 

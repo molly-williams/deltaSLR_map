@@ -19,7 +19,7 @@ library(rhandsontable)
 
 
 # Import tabular data for responsive table with population and assets at risk of exposure
-# Accessed from Delta Adapts sharepoint (Data and Modeling > Flooding Analysis) Jan 28 2021
+# Accessed from Delta Adapts sharepoint (Data and Modeling > Flooding Analysis), updated 26 Feb 2021
 
 tab_data <- read_csv("3_ShinyData/county_scenario_data.csv")
 
@@ -254,8 +254,7 @@ det_prob_polys <- rbind(M0_det, M1, M2, M3, M4, M0_prob, M5, M6, M7)
 
 # Join polygons with tabular data by island for population, asset value ($) and area (square miles)
 # From Delta Adapts sharepoint page, updated ~Jan 26 2021
-# https://deltacouncil.sharepoint.com/sites/DeltaAdaptsProject/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=SCeQzl&cid=3e2f8e57%2Dbb67%2D44b1%2D840e%2D594ef83cb5fc&RootFolder=%2Fsites%2FDeltaAdaptsProject%2FShared%20Documents%2FData%20and%20Modeling%2FFlooding%20Analysis&FolderCTID=0x01200090DD54C0503D78468E7D9D752120A071
-
+# https://deltacouncil.sharepoint.com/:x:/r/sites/DeltaAdaptsProject/_layouts/15/Doc.aspx?sourcedoc=%7BCF44EC9E-79E9-49F0-AA21-9F2C94EE125C%7D&file=Delta%20Adapts%20-%20VA%20GIS%20Tabular%20Outputs_Population.xlsx&action=default&mobileredirect=true
 
 island_data <- read_csv("3_ShinyData/island_data.csv") 
 

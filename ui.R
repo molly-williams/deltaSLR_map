@@ -1,7 +1,6 @@
 # Code adapted in part from the COVID-19 mapper app: https://shiny.rstudio.com/gallery/covid19-tracker.html,
 # and the SuperZIP map: https://shiny.rstudio.com/gallery/superzip-example.html, 
 
-
 library(shiny)
 library(shinyWidgets)
 library(leaflet)

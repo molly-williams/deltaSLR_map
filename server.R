@@ -1,13 +1,14 @@
 # Code adapted in part from the COVID-19 mapper app: https://shiny.rstudio.com/gallery/covid19-tracker.html,
 # and the SuperZIP map: https://shiny.rstudio.com/gallery/superzip-example.html, 
 
+# server
+
 library(shiny)
 library(leaflet)
 library(shinyjs)
 library(leaflet.extras2)
 library(slickR)
 library(DT)
-
 
 # Load and wrangle all required components for app
 source("wrangling.R")

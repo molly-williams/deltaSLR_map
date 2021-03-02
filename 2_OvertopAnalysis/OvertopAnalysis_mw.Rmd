@@ -1,0 +1,292 @@
+---
+title: "Delta Island Climate Change Flood Analysis"
+author: "Cory Copeland"
+date: "2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions:
+This script takes levee line data and water surface elevations at DSM2 nodes and outputs polygons of flooded areas in the form of shapefiles. Code chunks that require user inputs are identified in headers. After processing the first four code chunks, you can choose to run either the deterministic or probabilistic scenarios to create output polygons. 
+
+
+# Load required libraries
+```{r load, include=TRUE}
+library(raster)
+library(tidyverse)
+library(rgdal)
+source("2_OvertopAnalysis/R/functions.R")
+library(sf)
+library(rgeos)
+
+```
+
+
+# USER INPUT REQUIRED: 
+Give the script the path to your water surface elevations (WSE) CDF data file (.csv).
+The script currently filters the dataset to keep only columns of the return periods of interest:
+- 10 year (0.1)
+- 50 year (0.02)
+- 100 year (0.01)
+- 200 year (0.005)
+
+```{r WSEs, include=TRUE}
+
+# Loop imports each output CDF csv and select probabilities of interest, then joins them into one data frame.
+## If you want to run select scenarios, can select just those files to import. 
+
+### Format is [1]climate (Hist, 2050, 2085), [2]Slr amount [0,0.5,1,2,3,3.5,...], [3]river capped [e.g., "SJRcapped"]
+
+
+for (data in list.files("1_WSEs/Data/WSE/CDF")){
+  
+  # Create the first data if no data exist yet
+  if (!exists("dataset")){
+    dataset <- read_csv(sprintf("1_WSEs/Data/WSE/CDF/%s", data)) %>% 
+      dplyr::select(Node, "0.1", "0.02", "0.01", "0.005") #%>% 
+#      rename(setNames(sprintf("0.1_%s", data), sprintf("0.02_%s", data), sprintf("0.01_%s", data), sprintf("0.005_%s", data)))
+ # trying to add names to the headers, but not running!   
+  }
+  
+  # if data already exist, then append it together
+  if (exists("dataset")){
+    temporary <-read_csv(sprintf("1_WSEs/Data/WSE/CDF/%s", data)) %>% 
+      dplyr::select("0.1", "0.02", "0.01", "0.005")
+    dataset <-unique(cbind(dataset, temporary))
+    rm(temporary)
+  }
+  WSEs <- dataset[ -c(2:5) ] # delete later
+}
+
+
+# import order: 2050_0, 2050_1, 2050_10, 2050_2... 2085_0, 2085_1, 2085_10, 2085_2 ... Hist_0, Hist_1, Hist_10, Hist_2...  
+#  will the naming convention for andrew's code always be the same? whatever files he is outputting needs to match the scenario names in the order they're being imported. make sure it's reproducible if we aren't giving the headers distinctive names on import. 
+# also there's a problem in that the first dataset imported repeats itself
+
+
+
+```
+
+
+# USER INPUT REQUIRED: 
+Provide attribute names for scenarios to match the data frame columns (in order).
+These will translate to shapefile names (eg, SCENARIONAMEPoly.shp)
+*NOTE*: The number of output scenarios must match the number of columns in the "WSEs" dataframe.
+*NOTE*: An error may occur if the scenario names are too long or not sufficiently unique.
+```{r scenarios, include=TRUE}
+
+# H0_10 = Historical, 0' SLR, 0.1 probability. 
+# M1_200 = Mid-century (2050), 1' SLR, 0.005 probability
+# E5_100 = End-of-century (2085), 5' SLR, 0.01 probability
+# ****** needs to match the order in which they are being imported! ******
+
+scenarios <- c("M0_10", "M0_50", "M0_100", "M0_200",
+               "M1_10", "M1_50", "M1_100", "M1_200",
+               "M10_10", "M10_50", "M10_100", "M10_200",
+               "M2_10", "M2_50", "M2_100", "M2_200",
+               "M3_10", "M3_50", "M3_100", "M3_200",
+               "M4_10", "M4_50", "M4_100", "M4_200",
+               "M5_10", "M5_50", "M5_100", "M5_200",
+               "M6_10", "M6_50", "M6_100", "M6_200",
+               "M7_10", "M7_50", "M7_100", "M7_200",
+               
+               "E0_10", "E0_50", "E0_100", "E0_200",
+               "E1_10", "E1_50", "E1_100", "E1_200",
+               "E10_10", "E10_50", "E10_100", "E10_200",
+               "E2_10", "E2_50", "E2_100", "E2_200",
+               "E3_10", "E3_50", "E3_100", "E3_200",
+               "E4_10", "E4_50", "E4_100", "E4_200",
+               "E5_10", "E5_50", "E5_100", "E5_200",
+               "E6_10", "E6_50", "E6_100", "E6_200",
+               "E7_10", "E7_50", "E7_100", "E7_200",
+               
+               "H0_10", "H0_50", "H0_100", "H0_200",
+               "H1_10", "H1_50", "H1_100", "H1_200",
+               "H10_10", "H10_50", "H10_100", "H10_200",
+               "H2_10", "H2_50", "H2_100", "H2_200",
+               "H3_10", "H3_50", "H3_100", "H3_200",
+               "H4_10", "H4_50", "H4_100", "H4_200",
+               "H5_10", "H5_50", "H5_100", "H5_200",
+               "H6_10", "H6_50", "H6_100", "H6_200",
+               "H7_10", "H7_50", "H7_100", "H7_200"
+               )
+
+# Can also create a new vector to match specific scenarios you want to run, depending on which files you import above
+# scenarios <- c("M0_10", 'M0_50', "M0_100", 'M0_200')
+```
+
+
+# Run naming structure functions
+```{r functions, include=TRUE}
+# Name levee output dataset
+LEVNAME <- "leveeOutput12172020"
+
+# Run naming structure of the model output
+floodName<- scennam(scenarios)
+
+# Run naming structure for flood fighting component
+Fldfightvar <- ffnam(scenarios)
+
+```
+
+
+# USER INPUT REQUIRED (possibly): 
+Provide the path to the input levee dataset and create levee object
+```{r levees, include=TRUE}
+LeveePath <- "2_OvertopAnalysis/data/Levees/DeltaAdapts_Levees_200924.shp" # currently in this project repository, updated 9/24/20. # Updated in late Nov but filename was not changed.
+Levee <- LevProcess(LeveePath)
+```
+
+
+# Create deterministic polygons with floodfighting component
+```{r deterministic, include=TRUE}
+
+# Run naming structure for polygon output based on scenario names.
+shapename <- PolyName(scn="deterministic", scenarios)
+
+# Run levee overtopping analysis.  This produces a levee data set that will have an attribute for local WSE and if they have overtopped, ovetopping will be indicated as 1, 0 means WSE < Levee height.
+
+LeveeOut <- LevOver(Levee, floodName, WSEs, Fldfightvar, deterministic=TRUE)
+
+# Optional: write your output levee data set
+# writeOGR(LeveeOut, dsn = "output/LevLines" , layer = LEVNAME[1], driver="ESRI Shapefile")
+
+
+# Create polygons using the levees
+# Polytype can be simplified for smoother polygons or unsimplified for polygons that maintain the 100ft raster squares
+
+overtopanalysis(LeveeOut, shapename, floodName, Fldfightvar, deterministic=TRUE, polytype="simplified")
+
+# won't overwrite existing files; need to delete existing versions from the folder before running the function 
+```
+
+
+Still not really sure if I should be using the deterministic or probabilistic argument here if we are running every probability scenario and using files that have pre-determined SLR?! 
+
+
+
+# Create probabilistic polygons 
+
+```{r probabilistic, include=TRUE}
+
+# Run naming structure for polygon output based on scenario names.
+shapename <- PolyName(scn="probabilistic", scenarios)
+
+# Run levee overtopping analysis.  This produces a levee data set that will have an attribute for local WSE and if they have overtopped, ovetopping will be indicated as 1, 0 means WSE < Levee height.
+
+LeveeOut <- LevOver(Levee, floodName, WSEs, deterministic=FALSE)
+
+# Optional: write your output levee data set
+# writeOGR(LeveeOut, dsn = "output/LevLines" , layer = LEVNAME[1], driver="ESRI Shapefile")
+
+
+# Create polygons using the levees
+# Polytype can be set to "simplified" for smoother polygons or "unsimplified" for polygons that maintain the 100ft raster resolution. If unsimplified is selected, filename will be unsimpSCENARIONAME.shp. If simplified is selected, output will simply be SCENARIONAME.shp.
+
+overtopanalysis(LeveeOut, shapename, floodName, deterministic=FALSE, polytype="unsimplified")
+
+```
+
+
+# Merge polygons for use in shiny app 
+
+```{r}
+
+# Example of what loop below does on the level of individual shapefiles for four probabilities based on one hydrology (historical/H) and SLR (0') combination
+
+# rmapshaper::ms_erase() erases overlapping regions of higher probability polygons. Considered using this to make polygons smaller but ended up not using it.
+
+#h0_10 <- sf::st_read(dsn = "2_OvertopAnalysis/output/FloodPoly", layer = "H0_10Det") %>% 
+#  st_union() %>% 
+#  st_as_sf(data.frame(SLR=0, Prob=10)) 
+
+
+#h0_50 <- sf::st_read(dsn = "2_OvertopAnalysis/output/FloodPoly", layer = "H0_50Det") %>% 
+#  st_union() %>% 
+#  st_as_sf(data.frame(SLR=0, Prob=50))
+
+#h0_100 <- sf::st_read(dsn = "2_OvertopAnalysis/output/FloodPoly", layer = "H0_100Det") %>% 
+#  st_union() %>% 
+#  st_as_sf(data.frame(SLR=0, Prob=100)) 
+
+#h0_200 <- sf::st_read(dsn = "2_OvertopAnalysis/output/FloodPoly", layer = "H0_200Det") %>% 
+#  st_union() %>% 
+#  st_as_sf(data.frame(SLR=0, Prob=200))
+  
+
+# Combine all four probabilities into one shapefile
+#h0_combine <- rbind(h0_10, h0_50, h0_100, h0_200)
+# plot(h0_combine[2])
+
+
+
+# loop: import shapefiles, combine geometry into one polygon, and add information to the layer
+# this will take a few minutes to run usually 
+
+for (data in list.files("2_OvertopAnalysis/output/FloodPoly", 
+                         pattern="^[A-z]{1}[0-9]{1,}_[0-9]{1,}(Det.shp)")){ # finds everything in this folder that has this pattern
+  
+  if (!exists("poly_combined")){
+    poly_combined <- sf::st_read(sprintf("2_OvertopAnalysis/output/FloodPoly/%s", data)) %>% # loads the polygon based on name pattern
+      st_union() %>% # performs a union of all features in the polygon, merging them into one 
+      st_as_sf(data.frame(hydro=regmatches(data, gregexpr('^[A-z]{1}', data))[[1]], # creates an sf object and fills in hydrology, SLR, and probability data based on file name
+                                   SLR=regmatches(data, gregexpr('[0-9]{1,}_', data))[[1]],
+                                   Prob=regmatches(data, gregexpr('_[0-9]{1,}', data))[[1]]
+                          )) 
+
+  }
+  
+  if (exists("poly_combined")){
+    temporary <- sf::st_read(sprintf("2_OvertopAnalysis/output/FloodPoly/%s", data)) %>% 
+    st_union() %>% 
+    st_as_sf(data.frame(hydro=regmatches(data, gregexpr('^[A-z]{1}', data))[[1]],
+                                   SLR=regmatches(data, gregexpr('[0-9]{1,}_', data))[[1]],
+                                   Prob=regmatches(data, gregexpr('_[0-9]{1,}', data))[[1]]
+                          ))
+    poly_combined <-rbind(poly_combined, temporary)
+    rm(temporary)
+  
+      }
+}
+
+# remove dashes in data and remove repeated line 
+poly_combined$SLR <- str_remove_all(poly_combined$SLR, "_")
+
+poly_combined$Prob <- str_remove_all(poly_combined$Prob, "_")
+
+poly_combined <- poly_combined %>% 
+  distinct(hydro, SLR, Prob, x)
+
+
+# export shapefile
+st_write(poly_combined, "3_ShinyData/poly_combined.shp")
+
+```
+
+# Import combined polygons, simplify and re-export
+This is the file we end up importing into the shiny app to make the app interface operate smoothly.
+```{r}
+library(rmapshaper)
+library(pryr)
+
+poly_combined <- read_sf("3_ShinyData/poly_combined.shp")
+
+# Simplify shapefile using ms_simplify() - usually takes a few minutes. Reduces file size from 119 mb to 9 mb.
+poly_combined_simp <- rmapshaper::ms_simplify(poly_combined) %>% 
+  st_as_sf()
+
+st_write(poly_combined_simp, dsn = "3_ShinyData/poly_combined_simp.shp", layer = "", driver = "ESRI Shapefile" )
+# might be an issue with this and overwriting? 
+
+```
+
+
+
+
+
+
+
+

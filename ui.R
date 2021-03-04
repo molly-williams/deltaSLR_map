@@ -37,7 +37,7 @@ tagList(
 
 
 navbarPage(
-  title="Climate Change Flood Scenarios in the Delta",
+  title="Molly's App",
             id="nav",
 
 

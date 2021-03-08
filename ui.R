@@ -112,7 +112,7 @@ navbarPage(
              tags$ul(
                tags$li(tags$b("Deterministic"), "maps use a specific amount of sea level rise (SLR) (e.g. 0, 0.5’, 1’, 2’, and 3.5’) and a range of Delta water inflow possibilities (hydrology).  The maps display areas that would be exposed to flooding during a 100-year event, or an event that has a chance of occurrence of 1% in each year."),
                tags$br(),
-               tags$li(tags$b("Probabilistic"), "maps use a range of sea level rise amounts based on projections at each time-period and a range of Delta water inflow possibilities (hydrology). The maps display areas according to their likelihood of flooding. This acknowledges that all areas have some risk of flood exposure."),
+               tags$li(tags$b("Probabilistic"), "maps use a range of sea level rise amounts based on projections at each time period and a range of Delta water inflow possibilities (hydrology). The maps display areas according to their likelihood of flooding. This acknowledges that all areas have some risk of flood exposure."),
                tags$br(),
                tags$li(tags$b("Flood fighting"), "is a standard practice in many areas of the Delta during high water events, where flooding can be prevented when water levels exceed the top of levee by 6“ or less. Light blue regions of deterministic maps indicate areas where flooding could be avoided by implementing flood fighting activities."),
                tags$br(),
@@ -295,6 +295,8 @@ navbarPage(
                                                    choices=c("Historical", "2050", "2085"),
                                                    selected="Historical",
                                                    ),
+                                   
+                                   tags$em("'Historical' represents hydrological conditions between 1990-2016."),
                                       
                                       sliderTextInput(inputId="SLR",
                                                   label = h4("2. Select sea level rise (feet):"),

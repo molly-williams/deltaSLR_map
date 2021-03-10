@@ -53,3 +53,9 @@ h1, h2, h3, h4, h5 { font-weight: 400; }
   background-color: white !important;
 }
 
+.leaflet-control-layers-toggle {
+  background-color: #FAF8AF;
+  background-image: icon("layer-group");
+	width: 36px;
+	height: 36px;
+	}

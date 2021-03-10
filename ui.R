@@ -146,10 +146,13 @@ navbarPage(
                           includeCSS("styles.css")
                         ),
                         
-                        tags$head(tags$script(src = jsfile)),
+                        tags$head(tags$script(src = jsfile)), # 
                         
                         
                         leafletOutput("map2", width="100%", height="100%"),
+                        
+                        
+                        tags$style(".leaflet-control-layers-overlays{color: blue}"),
                         
                         absolutePanel(id = "controls", 
                                       class = "panel panel-default", 

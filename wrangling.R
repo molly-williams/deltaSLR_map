@@ -1,28 +1,42 @@
 
 
 # Check to see if required packages are installed, install them if not, then load them
+# Commented out for publishing purposes, but can be run to install packages that future users may not already have.
 
 packages = c("shiny", "leaflet", "shinyjs", "leaflet.extras2",
              "slickR", "DT", "RColorBrewer", "raster", "tidyverse",
-             "rgeos", "sf", "rmapshaper", "scales", "shinyalert", 
+             "rgeos", "sf", "rmapshaper", "scales", "shinyalert",
              "shinyWidgets")
 
-## Now load or install&load all
-package.check <- lapply(
-  packages,
-  FUN = function(x) {
-    if (!require(x, character.only = TRUE)) {
-      install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
-    }
-  }
-)
-
-
+# ## Now load or install&load all
+# package.check <- lapply(
+#   packages,
+#   FUN = function(x) {
+#     if (!require(x, character.only = TRUE)) {
+#       install.packages(x, dependencies = TRUE)
+#       library(x, character.only = TRUE)
+#     }
+#   }
+# )
 
 
 require(stringr)
 
+# Can comment these out if you're running the package installation function above
+library(shiny)
+library(leaflet)
+library(shinyjs)
+library(leaflet.extras2)
+library(DT)
+library(RColorBrewer)
+library(raster)
+library(tidyverse)
+library(rgeos)
+library(sf)
+library(rmapshaper)
+library(scales)
+library(shinyalert)
+library(shinyWidgets)
 
 
 

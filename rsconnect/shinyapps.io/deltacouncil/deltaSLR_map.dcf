@@ -5,9 +5,9 @@ account: deltacouncil
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3181965
-bundleId: 4237784
+bundleId: 4327472
 url: https://deltacouncil.shinyapps.io/deltaSLR_map/
-when: 1613601953.929
+when: 1615403478.2027
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .gitattributes|README.md|unzip_sf_clip_example.R|1_WSEs|2_OvertopAnalysis|old shiny scripts
+ignoredFiles: .gitattributes|README.md|1_WSEs|2_OvertopAnalysis
